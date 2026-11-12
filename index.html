@@ -485,7 +485,17 @@ const CHOICES = {
     ['hatter','Háttér','Background','egy-egy hivatkozás','an occasional citation'],['nem','Nem használom','Not used','','']],
   chapter:[['bevezetes','Bevezetés','Introduction'],['szakirodalom','Szakirodalmi áttekintés','Literature review'],
     ['modszertan','Anyag és módszer','Materials and methods'],['eredmenyek','Eredmények és értékelésük','Results and discussion'],
-    ['kovetkeztetes','Következtetések, javaslatok','Conclusions and recommendations']]
+    ['kovetkeztetes','Következtetések, javaslatok','Conclusions and recommendations']],
+  lang:[['magyar','Magyar','Hungarian'],['angol','Angol','English'],['nemet','Német','German'],['egyeb','Egyéb','Other']],
+  peer:[['igen','Igen','Yes','lektorált folyóirat vagy kiadvány','peer-reviewed journal or publication'],
+    ['nem','Nem','No','például szakmai cikk, jelentés, honlap','e.g. trade article, report, website'],['nemtudom','Nem tudom','Not sure','','']],
+  found:[['scholar','Google Scholar','Google Scholar'],['scopus','Scopus','Scopus'],['wos','Web of Science','Web of Science'],
+    ['adatbazis','Más adatbázis vagy könyvtári katalógus','Other database or library catalogue','pl. ScienceDirect, EBSCO, MATARKA','e.g. ScienceDirect, EBSCO'],
+    ['hivatkozas','Egy másik forrás hivatkozásából','From another source’s references'],['temavezeto','Témavezető ajánlotta','Recommended by supervisor'],['egyeb','Egyéb','Other']],
+  geo:[['helyi','Helyi vagy regionális','Local or regional','egy település, megye, régió','a town, county or region'],
+    ['orszagos','Országos','National','',''],
+    ['nemzetkozi','Nemzetközi régió','International region','pl. EU, Közép-Kelet-Európa','e.g. EU, Central and Eastern Europe'],
+    ['globalis','Globális','Global','több kontinens','several continents'],['nemertelmezheto','Nem értelmezhető','Not applicable','pl. elméleti írás','e.g. theoretical paper']]
 };
 const TPL = [
   {hu:['Bibliográfiai adatok','Kezdd a DOI-val: a hivatkozást, az évet és a megjelenés helyét az eszköz kitölti helyetted.'],
@@ -505,19 +515,40 @@ const TPL = [
      en:['Type of source','What kind of source this is. It tells you what to focus on in the next block: data and methods for an empirical study, the scope of the literature covered for a review, concepts and arguments for a theoretical paper.']},
     {k:'Kulcsszavak', type:'text',
      hu:['Kulcsszavak','A szerzők által megadott kulcsszavak, vesszővel elválasztva. A saját keresésed finomításához hasznosak.','consumer trust, food supply chain, survey'],
-     en:['Keywords','The keywords given by the authors, separated by commas. Useful for refining your own search.','consumer trust, food supply chain, survey']}
+     en:['Keywords','The keywords given by the authors, separated by commas. Useful for refining your own search.','consumer trust, food supply chain, survey']},
+    {k:'Forrás nyelve', type:'choice', set:'lang', single:true,
+     hu:['Forrás nyelve','A forrás nyelve. Sok szakdolgozati követelmény előírja, hány idegen nyelvű forrást kell feldolgozni; ezzel a mezővel egy szűréssel ellenőrizhető.'],
+     en:['Language of the source','The language the source is written in. Many thesis regulations require a minimum number of foreign-language sources; this field lets you check it with one filter.']},
+    {k:'Lektorált forrás', type:'choice', set:'peer', single:true,
+     hu:['Lektorált forrás','Átment-e a forrás szakmai lektoráláson (peer review). Folyóiratnál a folyóirat honlapján nézz utána („peer review”, „referee”), vagy hogy szerepel-e a Scopusban vagy a Web of Science-ben. Szakmai magazin, jelentés, blog vagy céges honlap általában nem lektorált.'],
+     en:['Peer reviewed','Whether the source went through peer review. For a journal, check the journal website (“peer review”, “referee”) or whether it is indexed in Scopus or Web of Science. Trade magazines, reports, blogs and company websites are usually not peer reviewed.']},
+    {k:'Honnan találtam', type:'choice', set:'found', single:true,
+     hu:['Honnan találtam','Hol bukkantál a forrásra. Ebből a dolgozat módszertani részében leírható, hogyan gyűjtötted a szakirodalmat.'],
+     en:['Where I found it','Where you came across the source. This lets you describe your literature search in the methods part of your thesis.']}
   ]},
   {hu:['A forrás tartalma','Mit vizsgáltak a szerzők, hogyan, és mire jutottak. Saját szavaiddal írd, ne másold ki a szöveget: így később közvetlenül fel tudod használni, és elkerülöd a plágiumot.'],
    en:['Content of the source','What the authors studied, how, and what they found. Write in your own words instead of copying the text: you can then reuse it directly, and you avoid plagiarism.'], f:[
     {k:'Cél vagy kutatási kérdés', type:'textarea', nk:true,
      hu:['Cél vagy kutatási kérdés','Mire keresnek választ a szerzők, 1–2 mondatban. Ha nincs kimondott kutatási kérdés, írd le, mit vizsgálnak ténylegesen.'],
      en:['Aim or research question','What the authors want to find out, in 1–2 sentences. If there is no explicit research question, describe what they actually examine.']},
+    {k:'Elméleti keret', type:'text', nk:true,
+     hu:['Elméleti keret','Milyen elméletre, modellre vagy fogalmi keretre épít a forrás. A szakirodalmi fejezet gerince gyakran ezekből áll össze, ezért érdemes pontosan megnevezni.','Tervezett magatartás elmélete (TPB, Ajzen 1991)'],
+     en:['Theoretical framework','The theory, model or conceptual framework the source builds on. The backbone of a literature review chapter is often made of these, so name it precisely.','Theory of Planned Behaviour (TPB, Ajzen 1991)']},
     {k:'Módszertani megközelítés', type:'choice', set:'method', single:true,
      hu:['Módszertani megközelítés','Milyen típusú módszerrel dolgoztak. Nem empirikus forrásnál (review, elméleti írás) a „Nem empirikus” lehetőséget válaszd.'],
      en:['Methodological approach','The type of method used. For a non-empirical source (review, theoretical paper) choose “Non-empirical”.']},
     {k:'Módszer és adatok', type:'textarea', nk:true,
      hu:['Módszer és adatok','Empirikus kutatásnál: kiket vagy mit vizsgáltak (minta, ország, időszak), milyen adatgyűjtéssel és elemzési módszerrel. Review-nál: hány forrást és milyen szempontok szerint dolgoztak fel. Elméleti írásnál: milyen elméletre vagy modellre építenek.','312 magyar fogyasztó online kérdőíve (2022), strukturális egyenletek modellje (SEM)'],
      en:['Methods and data','For an empirical study: who or what was studied (sample, country, period), with what data collection and analysis method. For a review: how many sources were covered and by what criteria. For a theoretical paper: which theory or model it builds on.','Online survey of 312 Hungarian consumers (2022), structural equation modelling (SEM)']},
+    {k:'Földrajzi hatókör', type:'choice', set:'geo', single:true,
+     hu:['Földrajzi hatókör','Milyen földrajzi szintre vonatkoznak a forrás adatai vagy állításai. Fontos, mert egy nyugat-európai vagy amerikai mintán kapott eredmény nem feltétlenül érvényes Magyarországra. Review-nál a feldolgozott tanulmányok együttes hatókörét jelöld.'],
+     en:['Geographical scope','The geographical level the data or claims of the source refer to. This matters because a result from a Western European or US sample does not necessarily hold elsewhere. For a review, mark the combined scope of the studies covered.']},
+    {k:'Ország vagy régió', type:'text', nk:true,
+     hu:['Ország vagy régió','A konkrét ország, régió vagy terület.','Magyarország, Somogy vármegye; vagy: EU-27'],
+     en:['Country or region','The specific country, region or area.','Hungary, Somogy county; or: EU-27']},
+    {k:'Vizsgált időszak', type:'text', nk:true,
+     hu:['Vizsgált időszak','Mikori adatokon alapul a forrás (az adatfelvétel vagy a vizsgált évek). Egy 2010-es adatfelvétel ma már másképp értékelendő, mint egy friss.','2015–2022; vagy: adatfelvétel 2022 tavaszán'],
+     en:['Period studied','When the data were collected or which years are covered. Data from 2010 should be weighed differently from recent data.','2015–2022; or: survey in spring 2022']},
     {k:'Fő megállapítások', type:'textarea',
      hu:['Fő megállapítások','A forrás legfontosabb eredményei vagy állításai 3–5 mondatban, saját szavaiddal. Úgy írd meg, hogy fél év múlva a forrás újraolvasása nélkül is értsd.'],
      en:['Main findings','The most important results or claims of the source in 3–5 sentences, in your own words. Write it so that you understand it in six months without rereading the source.']},
@@ -533,6 +564,9 @@ const TPL = [
     {k:'Korlátok', type:'textarea',
      hu:['Korlátok','Amit a szerzők maguk korlátként említenek, és amit te látsz gyengeségnek: kis vagy egyoldalú minta, régi adat, más ország vagy ágazat, nem lektorált forrás.'],
      en:['Limitations','Limitations mentioned by the authors and weaknesses you see yourself: small or one-sided sample, old data, a different country or sector, a source that was not peer reviewed.']},
+    {k:'Kapcsolat más forrásokkal', type:'textarea',
+     hu:['Kapcsolat más forrásokkal','Megerősíti, kiegészíti vagy cáfolja-e a már feldolgozott forrásaidat? Szerző és év elég. Ebből születik a szintézis: a szakirodalmi fejezet nem cikkek egymás utáni összefoglalása, hanem azok összevetése.','Megerősíti Kovács (2019) eredményét; ellentmond Smith és mtsai (2021) amerikai mintán kapott eredményének.'],
+     en:['Links to other sources','Does it confirm, complement or contradict sources you have already written up? Author and year are enough. This is where synthesis starts: a literature review is not a sequence of article summaries but a comparison of them.','Confirms Kovács (2019); contradicts Smith et al. (2021), who used a US sample.']},
     {k:'Megbízhatóság (1-5)', type:'scale',
      hu:['Megbízhatóság (1–5)','Mennyire építhetsz erre a forrásra a dolgozatodban. 1: alig használható. 3: közepes, óvatosan hivatkozható. 5: megbízható alapforrás.'],
      en:['Reliability (1–5)','How far you can build on this source in your thesis. 1: hardly usable. 3: moderate, cite with care. 5: reliable key source.']},
@@ -548,6 +582,9 @@ const TPL = [
     {k:'Kapcsolódás a saját témához', type:'textarea',
      hu:['Kapcsolódás a saját témához','Melyik kutatási kérdésedhez, hipotézisedhez vagy gondolatmenetedhez ad muníciót, és pontosan mit.'],
      en:['Link to your own topic','Which of your research questions, hypotheses or arguments it supports, and exactly how.']},
+    {k:'Kutatási rés', type:'textarea',
+     hu:['Kutatási rés','Mit nem vizsgáltak még a témában: amit a szerzők maguk hiányolnak, és amit te látsz hiányzónak (például más ország, más célcsoport, újabb adat). A saját kutatásod indoklása ezekből épül fel.','Magyar fogyasztói mintán még nem vizsgálták; a 2020 utáni időszakról nincs adat.'],
+     en:['Research gap','What has not been studied yet: gaps the authors point out and gaps you see yourself (e.g. another country, target group or more recent data). The justification of your own research is built from these.','Not yet studied on a Hungarian consumer sample; no data after 2020.']},
     {k:'Címkék', type:'tags',
      hu:['Címkék','Saját címkék a források csoportosításához (például egy alfejezet vagy altéma neve), vesszővel elválasztva. A témában már használt címkék alul megjelennek, kattintással hozzáadhatod őket.','bizalom, címkézés, fiatal fogyasztók'],
      en:['Tags','Your own tags for grouping sources (e.g. the name of a subsection or subtopic), separated by commas. Tags already used in the topic are listed below; click to add them.','trust, labelling, young consumers']},
@@ -565,7 +602,7 @@ const TPL = [
 const FIELDS = TPL.flatMap(b => b.f);
 const fieldDef = k => FIELDS.find(f => f.k === k);
 const META_COLS = ['Feldolgozó', 'Állapot', 'Témavezetői megjegyzés', 'Létrehozva', 'Módosítva'];
-const MATRIX = ['Hivatkozás','Év','Megjelenés helye','Forrás típusa','Módszertani megközelítés','Módszer és adatok','Fő megállapítások','Megbízhatóság (1-5)','Relevancia','Dolgozat fejezete','Címkék','Feldolgozó','Állapot'];
+const MATRIX = ['Hivatkozás','Év','Megjelenés helye','Forrás típusa','Forrás nyelve','Lektorált forrás','Elméleti keret','Módszertani megközelítés','Módszer és adatok','Földrajzi hatókör','Ország vagy régió','Vizsgált időszak','Fő megállapítások','Kapcsolat más forrásokkal','Megbízhatóság (1-5)','Relevancia','Dolgozat fejezete','Kutatási rés','Címkék','Feldolgozó','Állapot'];
 const STATUSES = ['piszkozat', 'beadva', 'javítandó', 'elfogadva'];
 const ST_CLS = {piszkozat:'st-draft', beadva:'st-sub', 'javítandó':'st-rev', elfogadva:'st-acc'};
 const LEVELS = ['BSc', 'MSc', 'egyéb'];
@@ -1032,6 +1069,8 @@ async function doiLookup(btn){
     }
     const typ = (m.type || '').toLowerCase();
     if (!filled(S.current.fields['Forrás típusa']) && /book/.test(typ)){ S.current.fields['Forrás típusa'] = 'konyv'; done.push(fLabel('Forrás típusa')); }
+    const nyelv = {en:'angol', hu:'magyar', de:'nemet'}[String(m.language || '').toLowerCase().slice(0, 2)];
+    if (nyelv && !filled(S.current.fields['Forrás nyelve'])){ S.current.fields['Forrás nyelve'] = nyelv; done.push(fLabel('Forrás nyelve')); }
     markDirty(); renderView();
     if (done.length) toast(t('f.doiDone', {f:done.join(', ')}) + (kept.length ? t('f.doiKept', {f:kept.join(', ')}) : t('f.doiCheck')));
     else toast(t('f.doiNone'));
@@ -1171,6 +1210,8 @@ function renderList(){
   ${rows.length ? `<div class="recs">${rows.map(r => {
     const chips = [];
     if (r['Forrás típusa']) chips.push(choiceLabel('stype', r['Forrás típusa']));
+    if (filled(r['Ország vagy régió']) && r['Ország vagy régió'] !== 'nem közli') chips.push(r['Ország vagy régió']);
+    else if (r['Földrajzi hatókör']) chips.push(choiceLabel('geo', r['Földrajzi hatókör']));
     if (r['Relevancia']) chips.push(choiceLabel('relevance', r['Relevancia']));
     splitList(r['Címkék']).forEach(x => chips.push(x));
     return `<button class="rec" data-act="open-record" data-id="${esc(r.id)}">
