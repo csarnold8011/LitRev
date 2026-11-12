@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Szakirodalom-feldolgozó</title>
+<style>
+:root{
+  --bg:#f5f6f4;--panel:#ffffff;--ink:#1c2420;--muted:#5f6b66;--line:#dde3df;--line2:#c9d2cd;
+  --accent:#1f6b55;--accent-ink:#ffffff;--accent-soft:#e2f0ea;--accent-line:#a9d2c1;
+  --b:#3d5a9e;--b-soft:#e6ecf8;
+  --warn:#8a5a00;--warn-soft:#fff3dc;--err:#b3261e;--err-soft:#fdeceb;
+  --help:#f3f7f5;--helpline:#c7ddd3;--chip:#eef1ef;
+  --shadow:0 1px 2px rgba(20,30,25,.05),0 2px 8px rgba(20,30,25,.06);
+  --r:10px;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121614;--panel:#1a201d;--ink:#e4ebe7;--muted:#9aa7a1;--line:#2b3430;--line2:#3a4540;
+  --accent:#5cc29f;--accent-ink:#0b1d16;--accent-soft:#1c3a30;--accent-line:#2f6b56;
+  --b:#8fa9e6;--b-soft:#1f2a42;
+  --warn:#f0b35a;--warn-soft:#3a2c14;--err:#f28b82;--err-soft:#3b1d1b;
+  --help:#18241f;--helpline:#2e4a3e;--chip:#232b27;
+  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+h1,h2,h3{line-height:1.25;margin:0}
+.muted{color:var(--muted)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.toprow{display:flex;align-items:center;gap:10px;padding:12px 0 8px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1}
+.brand h1{font-size:18px;font-weight:650;letter-spacing:-.01em}
+.brand small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);white-space:nowrap;cursor:pointer}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.pill.ok .dot{background:var(--accent)}.pill.err .dot{background:var(--err)}
+.pill.loading .dot{animation:pulse 1s infinite ease-in-out}
+@keyframes pulse{50%{opacity:.25}}
+.who{font-size:12.5px;color:var(--muted);text-align:right;line-height:1.3}
+.who b{color:var(--ink);font-weight:550}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:9px 14px;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap;font-weight:500}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--ink)}
+.tab.back{padding-left:4px}
+.tabsep{width:1px;background:var(--line);margin:8px 6px}
+main{padding:22px 0 80px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line2);background:var(--panel);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:500;line-height:1.2;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);background:var(--chip)}
+.btn.danger{color:var(--err)}
+.btn.danger:hover{border-color:var(--err)}
+.btn.sm{padding:5px 10px;font-size:13.5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.mini{border:1px solid var(--line);background:transparent;border-radius:6px;padding:2px 8px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.mini:hover{color:var(--ink);border-color:var(--line2)}
+.langbtn{border:1px solid var(--line2);background:var(--panel);border-radius:6px;padding:3px 8px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--muted)}
+.langbtn:hover{color:var(--ink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:18px 20px}
+.banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-radius:var(--r);margin-bottom:16px;border:1px solid transparent}
+.banner.info{background:var(--accent-soft);border-color:var(--accent-line)}
+.banner.warn{background:var(--warn-soft)}
+.banner.err{background:var(--err-soft)}
+.banner p{margin:0;flex:1;min-width:200px}
+.banner .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:2px}
+.banner .cm{white-space:pre-wrap}
+input[type=text],input[type=email],input[type=password],input[type=search],textarea{width:100%;border:1px solid var(--line2);background:var(--panel);border-radius:8px;padding:9px 11px;outline:none;transition:border-color .15s,box-shadow .15s}
+textarea{resize:vertical;min-height:76px}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[readonly]{background:var(--bg)}
+.note{font-size:13px;color:var(--muted);margin-top:4px}
+.note.err{color:var(--err)}
+
+/* belépés */
+.loginwrap{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login{max-width:460px;width:100%;padding:26px 28px 24px;position:relative}
+.login .langbtn{position:absolute;top:16px;right:16px}
+.login h1{font-size:22px;margin-bottom:4px;padding-right:70px}
+.login .sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+.frm{display:flex;flex-direction:column;gap:14px}
+.frm label{font-weight:600;font-size:14px;display:block;margin-bottom:5px}
+.frm .btn.primary{padding:10px 14px}
+.login .foot{margin:18px 0 0;font-size:13px;color:var(--muted)}
+.login .seg{width:100%;margin-bottom:18px}
+.login .seg button{flex:1}
+.invbox{background:var(--help);border:1px solid var(--helpline);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:14px}
+.invbox p{margin:0}.invbox p+p{margin-top:6px}
+
+/* témák */
+.headrow{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.headrow .intro{flex:1;min-width:260px}
+.intro h2{font-size:22px;margin-bottom:6px}
+.intro p{margin:0;color:var(--muted);max-width:760px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.tcard{display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);box-shadow:var(--shadow);transition:border-color .15s,transform .15s}
+.tcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tcard h3{font-size:17px}
+.tcard .ds{color:var(--muted);font-size:14px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tcard .ln{font-size:13px;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap;background:var(--chip);color:var(--muted)}
+.badge.lvl{background:var(--accent-soft);color:var(--accent)}
+.badge.closed{background:var(--warn-soft);color:var(--warn)}
+.badge.role{background:var(--b-soft);color:var(--b)}
+.badge.st-draft{background:var(--chip);color:var(--muted)}
+.badge.st-sub{background:var(--b-soft);color:var(--b)}
+.badge.st-rev{background:var(--warn-soft);color:var(--warn)}
+.badge.st-acc{background:var(--accent-soft);color:var(--accent)}
+.badge.hot{background:var(--warn-soft);color:var(--warn)}
+.hint{margin-top:18px;padding:14px 16px;background:var(--help);border:1px solid var(--helpline);border-radius:var(--r);font-size:14px}
+.hint ol{margin:6px 0 0;padding-left:20px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+
+/* űrlap */
+.formbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.formbar .ttl{flex:1;min-width:200px}
+.formbar .ttl .eyebrow{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;gap:8px;align-items:center}
+.formbar .ttl .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:560px}
+.savestate{font-size:12.5px;color:var(--muted)}
+.savestate.dirty{color:var(--warn)}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+.progress{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:18px}
+.progress span{display:block;height:100%;background:var(--accent);transition:width .25s}
+.fgrid{display:grid;grid-template-columns:250px 1fr;gap:20px;align-items:start}
+.steps{position:sticky;top:110px;display:flex;flex-direction:column;gap:4px}
+.step{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid transparent;background:transparent;border-radius:8px;padding:8px 10px;cursor:pointer;width:100%}
+.step:hover{background:var(--panel);border-color:var(--line)}
+.step.on{background:var(--panel);border-color:var(--line2);box-shadow:var(--shadow)}
+.step .num{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:600;background:var(--chip);color:var(--muted)}
+.step.on .num{background:var(--accent);color:var(--accent-ink)}
+.step.done .num{background:var(--accent-soft);color:var(--accent)}
+.step .st{display:flex;flex-direction:column;min-width:0}
+.step b{font-weight:550;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step small{font-size:12px;color:var(--muted)}
+.blockhead{margin-bottom:6px}
+.blockhead .eyebrow{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.blockhead h2{font-size:21px;margin-bottom:4px}
+.blockhead p{margin:0;color:var(--muted)}
+.field{padding:16px 0;border-top:1px solid var(--line)}
+.field:first-child{border-top:0}
+.flabel{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap}
+.flabel label{font-weight:600}
+.req{color:var(--err);font-weight:600}
+.hbtn{flex:none;width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);background:var(--panel);color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;display:grid;place-items:center;padding:0}
+.hbtn:hover,.hbtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cattag{font-size:11.5px;color:var(--muted);border:1px dashed var(--line2);padding:0 6px;border-radius:5px}
+.nkbtn{margin-left:auto;border:0;background:none;color:var(--muted);font-size:12.5px;cursor:pointer;padding:2px 4px;border-radius:5px;text-decoration:underline dotted;text-underline-offset:3px}
+.nkbtn:hover{color:var(--ink);background:var(--chip)}
+.help{background:var(--help);border:1px solid var(--helpline);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:14px}
+.help p{margin:0}
+.help p+p{margin-top:6px}
+.help .ex{color:var(--muted)}
+.doirow{display:flex;gap:8px;flex-wrap:wrap}
+.doirow input{flex:1 1 220px;width:auto}
+.opts{display:flex;flex-wrap:wrap;gap:7px}
+.opt{display:inline-flex;align-items:baseline;gap:7px;border:1px solid var(--line2);background:var(--panel);border-radius:8px;padding:6px 11px;cursor:pointer;text-align:left;max-width:100%;font-size:14px}
+.opt:hover{border-color:var(--accent)}
+.opt .desc{font-size:12.5px;color:var(--muted)}
+.opt.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:550}
+.opt.on .desc{color:var(--ink);font-weight:400}
+.tagsugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.scale{display:flex;gap:6px;flex-wrap:wrap}
+.sc{width:44px;height:40px;border:1px solid var(--line2);background:var(--panel);border-radius:8px;cursor:pointer;font-weight:600}
+.sc.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.scalelegend{font-size:12.5px;color:var(--muted);margin-top:5px}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.navrow .r{display:flex;gap:8px;flex-wrap:wrap}
+
+/* lista */
+.listbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.listbar input[type=search]{flex:1;min-width:200px}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:var(--panel);padding:8px 12px;cursor:pointer;font-size:13.5px;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.stats{font-size:13.5px;color:var(--muted);margin-bottom:10px}
+.recs{display:flex;flex-direction:column;gap:8px}
+.rec{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:start;text-align:left;width:100%;padding:13px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);cursor:pointer}
+.rec:hover{border-color:var(--accent)}
+.rec .rt{font-weight:550;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rec .rm{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right}
+.rec .rc{grid-column:2/4;display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11.5px;background:var(--chip);border-radius:5px;padding:1px 7px;color:var(--muted)}
+.chip.cm{background:var(--warn-soft);color:var(--warn)}
+
+/* modális ablakok */
+.overlay{position:fixed;inset:0;background:rgba(10,15,12,.45);z-index:50;display:flex;justify-content:center;align-items:flex-start;padding:30px 16px;overflow:auto}
+.modal{background:var(--panel);border-radius:12px;max-width:820px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.modal.narrow{max-width:560px}
+.modal header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.modal header .h{flex:1;min-width:0}
+.modal header h2{font-size:17px;margin-top:6px}
+.modal .body{padding:6px 20px 20px}
+.modal .body.frm{padding-top:18px}
+.modal h3{font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:20px 0 8px}
+.dl{display:grid;grid-template-columns:220px 1fr;border-top:1px solid var(--line)}
+.dl>div{padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.dl .k{color:var(--muted);padding-right:12px}
+.dl .v{white-space:pre-wrap;word-break:break-word}
+.dl .v.none{color:var(--muted);font-style:italic}
+.modal footer{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
+.modal footer .left{margin-right:auto}
+.modal.wide{max-width:1040px}
+.modal.wide footer{position:sticky;bottom:0;background:var(--panel);border-radius:0 0 12px 12px;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
+.review{margin-top:16px;padding:14px 16px;border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:var(--r)}
+.review h3{margin:0 0 10px}
+.review textarea{margin-top:10px;background:var(--panel)}
+.review .rr{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.invitem{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:10px}
+.invitem .em{font-weight:600}
+.invitem .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.invitem .row input{flex:1 1 260px;width:auto;font-size:13px}
+
+/* téma és hallgatók */
+.mgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;align-items:start}
+.mgrid h3{font-size:16px;margin-bottom:8px}
+.kv{font-size:14px;margin:6px 0}
+.kv .k{color:var(--muted)}
+.mtable{width:100%;border-collapse:collapse;font-size:14px}
+.mtable td{padding:9px 6px;border-top:1px solid var(--line);vertical-align:top}
+.mtable td.act{text-align:right;white-space:nowrap}
+.mtable .sub{font-size:12.5px;color:var(--muted)}
+.addrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.addrow input{flex:1 1 240px;width:auto}
+
+/* letöltés */
+.exrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0}
+.exlbl{font-weight:600;font-size:14px;min-width:80px}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:14px}
+.exblk{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.exblk .bh{font-weight:600;font-size:14px;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.ck{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:3px 0;cursor:pointer;line-height:1.35}
+.ck input{accent-color:var(--accent);width:15px;height:15px;margin:1px 0 0;flex:none}
+.exsum{margin-right:auto;font-size:13.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:9px;font-size:14px;z-index:80;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+.toast.err{background:var(--err);color:#fff}
+[hidden]{display:none!important}
+
+@media (max-width:860px){
+  .fgrid,.mgrid{grid-template-columns:1fr}
+  .steps{position:static;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .step{flex:none;width:auto;padding:6px 10px}
+  .step .st small{display:none}
+  .dl{grid-template-columns:1fr}
+  .dl .k{border-bottom:0!important;padding-bottom:0}
+  .rec{grid-template-columns:1fr}
+  .rec .rc{grid-column:1}
+  .rec .rm{text-align:left}
+  .who{display:none}
+  .brand{flex-basis:100%}
+  .toprow{gap:6px}
+  .toprow .pill{margin-right:auto}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="config.js"></script>
+<script>
+'use strict';
+const CFG = window.SZ_CONFIG || {};
+const API = String(CFG.apiUrl || '').trim();
+
+/* ================= Szövegek / Texts ================= */
+const I18N = {
+hu:{
+  app:'Szakirodalom-feldolgozó', other:'English', otherShort:'EN',
+  appSub:'Szakirodalmi feldolgozó sablon BSc- és MSc-hallgatóknak, közös felületen a témavezetővel.',
+  'lg.tabLogin':'Belépés', 'lg.tabReg':'Témavezetői regisztráció',
+  'lg.email':'E-mail cím', 'lg.pw':'Jelszó', 'lg.pw2':'Jelszó még egyszer', 'lg.name':'Teljes név', 'lg.code':'Témavezetői regisztrációs kód',
+  'lg.codeNote':'A kódot az oldal adminisztrátorától kapod.', 'lg.pwNote':'Legalább 8 karakter.',
+  'lg.login':'Belépés', 'lg.register':'Regisztráció', 'lg.busy':'Folyamatban…',
+  'lg.foot':'Hallgatóként a témavezetődtől kapott meghívó linkkel regisztrálhatsz. Elfelejtett jelszó esetén hallgatóként a témavezetődtől, témavezetőként az adminisztrátortól kérj új linket.',
+  'lg.notConfigured':'<b>Az oldal még nincs beállítva.</b> A config.js fájlban add meg az Apps Script webalkalmazás címét.',
+  'lg.fillAll':'Tölts ki minden mezőt.', 'lg.pwMismatch':'A két jelszó nem egyezik.', 'lg.pwShort':'A jelszó legalább 8 karakter legyen.',
+  'lg.loggedOut':'{m} A nem mentett munkád piszkozatként megmaradt ezen a gépen.',
+  'inv.title':'Regisztráció meghívóval', 'inv.resetTitle':'Új jelszó beállítása', 'inv.checking':'A link ellenőrzése…',
+  'inv.to':'Meghívást kaptál ehhez a témához: <b>{t}</b>', 'inv.tv':'Témavezető: {n}',
+  'inv.email':'Ezzel az e-mail címmel regisztrálsz: <b>{e}</b>', 'inv.resetFor':'Új jelszót állítasz be ehhez a fiókhoz: <b>{e}</b>',
+  'inv.hasAccount':'Ezzel az e-mail címmel ({e}) már van fiókod. Lépj be a jelszavaddal, a téma ott lesz a listádban.',
+  'inv.submit':'Regisztráció és belépés', 'inv.resetSubmit':'Jelszó mentése és belépés', 'inv.toLogin':'Tovább a belépéshez',
+  'inv.newPw':'Új jelszó',
+  'hd.ok':'Szinkronizálva', 'hd.loading':'Szinkronizálás…', 'hd.err':'Kapcsolati hiba', 'hd.syncTip':'Kattints az újraszinkronizáláshoz',
+  'hd.account':'Fiók', 'hd.logout':'Kilépés', 'role.tv':'témavezető', 'role.h':'hallgató',
+  'tab.home':'Témáim', 'tab.form':'Feldolgozás', 'tab.list':'Feldolgozások', 'tab.members':'Téma és hallgatók',
+  'home.title':'Témáim',
+  'home.introTv':'Hozz létre egy témát minden hallgatódnak (vagy hallgatói csoportodnak). A hallgatók meghívó linkkel csatlakoznak, és a feldolgozásaik itt jelennek meg értékelésre.',
+  'home.introH':'Válaszd ki a témát, amelyhez szakirodalmat dolgozol fel.',
+  'home.new':'Új téma', 'home.emptyTv':'Még nincs témád.',
+  'home.emptyH':'Még nem vagy egyetlen témához sem rendelve. A témavezetődtől kapott meghívó linkkel csatlakozhatsz.',
+  'home.how':'Így működik', 'home.how1':'Hozz létre egy témát, és add meg a hallgató(k) e-mail címét.',
+  'home.how2':'A rendszer minden hallgatónak meghívó linket készít. Küldd el nekik (az e-mail gomb kitölti a levelet).',
+  'home.how3':'A hallgató a linken saját jelszót állít be, és feldolgozza a forrásait.',
+  'home.how4':'A „Beadva” állapotú feldolgozásokhoz megjegyzést írhatsz, és elfogadhatod vagy javításra visszaküldheted őket.',
+  'home.students':'{n} hallgató', 'home.pending':'{n} meghívó függőben', 'home.records':'{n} feldolgozás',
+  'home.toReview':'{n} értékelésre vár', 'home.toRevise':'{n} javítandó', 'home.ownTopic':'saját téma', 'home.asStudent':'hallgatóként',
+  'home.supervisor':'Témavezető: {n}', 'lvl.BSc':'BSc', 'lvl.MSc':'MSc', 'lvl.egyéb':'Egyéb', 'closed':'lezárva',
+  'st.piszkozat':'Piszkozat', 'st.beadva':'Beadva', 'st.javítandó':'Javítandó', 'st.elfogadva':'Elfogadva',
+  'f.new':'Új feldolgozás', 'f.editing':'Mentett feldolgozás szerkesztése', 'f.untitled':'Új, még cím nélküli forrás',
+  'f.helpAll':'Súgó minden mezőnél', 'f.save':'Mentés', 'f.submit':'Mentés és beküldés a témavezetőnek', 'f.resubmit':'Mentés és újra beküldés',
+  'f.prev':'Előző blokk', 'f.next':'Következő: {b}', 'f.block':'{i}. blokk a {n}-ból', 'f.filled':'{m}/{n} kitöltve',
+  'f.dirty':'Nem mentett változások (piszkozat ezen a gépen)', 'f.savedAt':'Mentve: {t}', 'f.saved':'Mentve.',
+  'f.submitted':'Mentve és beküldve a témavezetőnek.', 'f.needRef':'A Hivatkozás mező kitöltése kötelező a mentéshez.',
+  'f.saveFail':'A mentés nem sikerült: {m} A piszkozat ezen a gépen megmaradt.',
+  'f.confirmNew':'Vannak nem mentett változások. Biztosan új feldolgozást kezdesz? A mostani piszkozat elvész.',
+  'f.confirmOpen':'A jelenlegi feldolgozásban nem mentett változások vannak. Megnyitod helyette ezt?',
+  'f.closed':'<b>A téma le van zárva.</b> A feldolgozásokat olvashatod, de új mentés nem lehetséges.',
+  'f.comment':'Témavezetői megjegyzés', 'f.nk':'nem közli', 'f.nkTip':'A forrás erről nem közöl információt', 'f.nkVal':'nem közli',
+  'f.single':'egy választás', 'f.multi':'több is választható', 'f.help':'Súgó', 'f.example':'Példa:',
+  'f.doiBtn':'Kitöltés DOI alapján', 'f.doiBusy':'Lekérés…', 'f.doiBad':'Ez nem tűnik érvényes DOI-nak. A DOI 10.-tel kezdődik, például 10.1016/j.foodpol…',
+  'f.doi404':'A Crossref nem ismeri ezt a DOI-t. Ellenőrizd, vagy töltsd ki kézzel a mezőket.',
+  'f.doiDone':'Kitöltve: {f}.', 'f.doiKept':' A már kitöltött mezőket ({f}) nem írtam felül.', 'f.doiCheck':' Ellenőrizd a hivatkozást.',
+  'f.doiNone':'Minden érintett mező ki volt már töltve, nem írtam felül semmit.', 'f.doiFail':'A DOI lekérése nem sikerült ({m}). Töltsd ki kézzel a mezőket.',
+  'f.scaleLegend':'1: alig használható · 3: közepes · 5: megbízható alapforrás', 'f.tagSugg':'Korábbi címkék:',
+  'f.notMember':'Ebben a témában témavezető vagy, ezért feldolgozást nem írsz, csak értékelsz.',
+  'l.search':'Keresés szerzőre, címre, címkére, bármilyen szövegre…', 'l.all':'Mind', 'l.refresh':'Frissítés', 'l.export':'Letöltés táblázatként',
+  'l.count':'{n} feldolgozás', 'l.hits':'{n} találat', 'l.noRef':'(nincs hivatkozás)', 'l.noMatch':'Nincs a szűrésnek megfelelő feldolgozás.',
+  'l.loading':'Betöltés…', 'l.empty':'Még nincs feldolgozás ebben a témában.', 'l.hasComment':'megjegyzés',
+  'd.by':'Feldolgozta: {n}', 'd.created':'létrehozva {t}', 'd.modified':'módosítva {t}', 'd.empty':'nincs kitöltve',
+  'd.close':'Bezárás', 'd.edit':'Megnyitás szerkesztésre', 'd.delete':'Törlés', 'd.confirmDelete':'Biztosan törlöd ezt a feldolgozást? A témavezető és a hallgatók sem fogják többé látni.',
+  'd.deleted':'A feldolgozás törölve.', 'd.extra':'Egyéb oszlopok a táblázatban',
+  'rv.title':'Témavezetői értékelés', 'rv.ph':'Megjegyzés a hallgatónak (mit egészítsen ki, mit javítson, mi jó)…',
+  'rv.save':'Értékelés mentése', 'rv.saved':'Az értékelés elmentve, a hallgató a feldolgozás megnyitásakor látja.', 'rv.when':'Utolsó értékelés: {t}',
+  't.newTitle':'Új téma', 't.editTitle':'A téma adatai', 't.cim':'A téma címe', 't.cimPh':'pl. Kovács Anna szakdolgozata: fogyasztói bizalom a rövid ellátási láncokban',
+  't.leiras':'Rövid leírás (nem kötelező)', 't.leirasPh':'A kutatási kérdés, a fókusz vagy bármi, ami eligazítja a hallgatót.',
+  't.kepzes':'Képzési szint', 't.students':'Hallgatók e-mail címei', 't.studentsNote':'Soronként egy cím (vesszővel vagy szóközzel is elválaszthatod). Később is felvehetsz hallgatót.',
+  't.create':'Téma létrehozása', 't.save':'Mentés', 't.cancel':'Mégse', 't.needTitle':'Add meg a téma címét.', 't.saved':'A téma adatai elmentve.',
+  't.created':'A téma létrejött.',
+  'm.topic':'A téma', 'm.edit':'Szerkesztés', 'm.close':'Téma lezárása', 'm.reopen':'Téma újranyitása', 'm.closedNote':'Lezárt témában a hallgatók csak olvashatnak.',
+  'm.confirmClose':'Lezárod a témát? A hallgatók ezután csak olvashatják a feldolgozásokat. Bármikor újranyithatod.',
+  'm.students':'Hallgatók', 'm.created':'Létrehozva: {t}', 'm.level':'Képzési szint: {l}', 'm.noStudents':'Még nincs hallgató a témában.',
+  'm.registered':'regisztrált', 'm.pending':'meghívó függőben, {d}-ig érvényes', 'm.expired':'a meghívó lejárt vagy elveszett, készíts újat',
+  'm.newInvite':'Új meghívó link', 'm.resetLink':'Jelszó-visszaállító link', 'm.remove':'Eltávolítás',
+  'm.confirmRemove':'Eltávolítod {e} címet a témából? A már elkészült feldolgozásai megmaradnak.',
+  'm.removed':'A hallgató eltávolítva a témából.', 'm.addPh':'hallgato@example.com (több cím is megadható)', 'm.add':'Hallgató felvétele',
+  'm.you':'(te)',
+  'iv.title':'Meghívó linkek', 'iv.note':'A linkek csak most láthatók. Ha valamelyik elveszik, a „Téma és hallgatók” fülön bármikor készíthetsz újat (a régi ezzel érvénytelenné válik).',
+  'iv.copy':'Másolás', 'iv.mail':'E-mail', 'iv.copied':'A link a vágólapon.', 'iv.until':'{d}-ig érvényes, egyszer használható.',
+  'iv.already':'Már regisztrált felhasználó: a téma megjelenik a listájában, linkre nincs szükség.', 'iv.member':'Már tagja volt a témának.',
+  'iv.resetNote':'Jelszó-visszaállító link a már regisztrált hallgatónak.',
+  'ac.title':'Fiók', 'ac.name':'Név', 'ac.saveName':'Név mentése', 'ac.nameSaved':'A név elmentve.', 'ac.pwTitle':'Jelszócsere',
+  'ac.oldPw':'Jelenlegi jelszó', 'ac.newPw':'Új jelszó', 'ac.newPw2':'Új jelszó még egyszer', 'ac.savePw':'Jelszó módosítása',
+  'ac.pwSaved':'A jelszó megváltozott. A többi eszközön újra be kell lépned.', 'ac.email':'E-mail cím: {e}', 'ac.role':'Szerep: {r}',
+  'ex.title':'Letöltés táblázatként', 'ex.sub':'Válaszd ki az oszlopokat. A böngésző megjegyzi a választást a következő letöltéshez.',
+  'ex.rows':'Feldolgozások', 'ex.all':'Mind ({n})', 'ex.view':'Csak a szűrés találatai ({n})', 'ex.cols':'Oszlopok',
+  'ex.matrix':'Szintézismátrix', 'ex.matrixTip':'Hivatkozás, év, típus, fő megállapítások, értékelés és felhasználás', 'ex.allCols':'Minden mező', 'ex.none':'Egyik sem',
+  'ex.sum':'{r} feldolgozás · {c} oszlop', 'ex.excel':'Letöltés Excelben', 'ex.admin':'Adminisztratív adatok', 'ex.busy':'Készül…',
+  'ex.done':'Letöltve: {r} feldolgozás, {c} oszlop.', 'ex.csvDone':'Letöltve: {r} feldolgozás, {c} oszlop (CSV, pontosvesszővel tagolva).',
+  'ex.fail':'Az Excel-fájl nem készült el ({m}). Próbáld a CSV gombot, az Excel azt is megnyitja.', 'ex.libFail':'az Excel-modul nem töltődött be', 'ex.sheet':'Feldolgozások',
+  'col.Feldolgozó':'Feldolgozó', 'col.Állapot':'Állapot', 'col.Témavezetői megjegyzés':'Témavezetői megjegyzés', 'col.Létrehozva':'Létrehozva', 'col.Módosítva':'Módosítva',
+  'sync.ok':'Szinkronizálva.', 'sync.fail':'Nem sikerült elérni a szervert: {m}',
+  'err.banner':'<b>Nem érem el a szervert.</b> {m} A munkád piszkozatként ezen a gépen megmarad.', 'err.retry':'Újra',
+  'mail.subjInvite':'Meghívó: szakirodalom-feldolgozás / Invitation: literature review',
+  'mail.subjReset':'Új jelszó beállítása / Set a new password',
+  'mail.invite':'Kedves Hallgató!\n\nMeghívtalak a(z) „{t}” téma közös szakirodalom-feldolgozó felületére. Az alábbi linken állítsd be a saját jelszavadat ({e} címmel regisztrálsz). A link {d}-ig érvényes, és egyszer használható:\n\n{l}\n\nUtána a {u} oldalon tudsz belépni.\n\nÜdvözlettel:\n{n}',
+  'mail.reset':'Kedves Hallgató!\n\nAz alábbi linken új jelszót állíthatsz be a szakirodalom-feldolgozó felülethez ({e}). A link {d}-ig érvényes, és egyszer használható:\n\n{l}\n\nÜdvözlettel:\n{n}',
+  'err.NET':'A szerver nem érhető el. Ellenőrizd az internetkapcsolatot.', 'err.BADRESP':'A szerver nem a várt választ adta.'
+},
+en:{
+  app:'Literature Review Tool', other:'Magyar', otherShort:'HU',
+  appSub:'A literature review template for BSc and MSc students, shared with the supervisor.',
+  'lg.tabLogin':'Sign in', 'lg.tabReg':'Supervisor registration',
+  'lg.email':'Email address', 'lg.pw':'Password', 'lg.pw2':'Repeat password', 'lg.name':'Full name', 'lg.code':'Supervisor registration code',
+  'lg.codeNote':'You get the code from the site administrator.', 'lg.pwNote':'At least 8 characters.',
+  'lg.login':'Sign in', 'lg.register':'Register', 'lg.busy':'Working…',
+  'lg.foot':'Students register through the invitation link received from their supervisor. If you forgot your password, ask your supervisor (students) or the administrator (supervisors) for a new link.',
+  'lg.notConfigured':'<b>This site is not configured yet.</b> Set the Apps Script web app URL in config.js.',
+  'lg.fillAll':'Please fill in every field.', 'lg.pwMismatch':'The two passwords do not match.', 'lg.pwShort':'The password must be at least 8 characters long.',
+  'lg.loggedOut':'{m} Your unsaved work has been kept as a draft on this computer.',
+  'inv.title':'Register with an invitation', 'inv.resetTitle':'Set a new password', 'inv.checking':'Checking the link…',
+  'inv.to':'You have been invited to this topic: <b>{t}</b>', 'inv.tv':'Supervisor: {n}',
+  'inv.email':'You are registering with this email address: <b>{e}</b>', 'inv.resetFor':'You are setting a new password for this account: <b>{e}</b>',
+  'inv.hasAccount':'You already have an account with this email address ({e}). Sign in with your password; the topic will be in your list.',
+  'inv.submit':'Register and sign in', 'inv.resetSubmit':'Save password and sign in', 'inv.toLogin':'Go to sign in',
+  'inv.newPw':'New password',
+  'hd.ok':'Synced', 'hd.loading':'Syncing…', 'hd.err':'Connection error', 'hd.syncTip':'Click to sync again',
+  'hd.account':'Account', 'hd.logout':'Sign out', 'role.tv':'supervisor', 'role.h':'student',
+  'tab.home':'My topics', 'tab.form':'Write-up', 'tab.list':'Write-ups', 'tab.members':'Topic and students',
+  'home.title':'My topics',
+  'home.introTv':'Create a topic for each of your students (or student groups). Students join through an invitation link, and their write-ups appear here for review.',
+  'home.introH':'Choose the topic you are reviewing literature for.',
+  'home.new':'New topic', 'home.emptyTv':'You have no topics yet.',
+  'home.emptyH':'You are not assigned to any topic yet. Use the invitation link from your supervisor to join.',
+  'home.how':'How it works', 'home.how1':'Create a topic and enter the email address of the student(s).',
+  'home.how2':'The system creates an invitation link for each student. Send it to them (the email button drafts the message).',
+  'home.how3':'Students set their own password through the link and start writing up their sources.',
+  'home.how4':'You can comment on write-ups marked “Submitted”, then accept them or send them back for revision.',
+  'home.students':'{n} student(s)', 'home.pending':'{n} invitation(s) pending', 'home.records':'{n} write-up(s)',
+  'home.toReview':'{n} awaiting review', 'home.toRevise':'{n} to revise', 'home.ownTopic':'my topic', 'home.asStudent':'as student',
+  'home.supervisor':'Supervisor: {n}', 'lvl.BSc':'BSc', 'lvl.MSc':'MSc', 'lvl.egyéb':'Other', 'closed':'closed',
+  'st.piszkozat':'Draft', 'st.beadva':'Submitted', 'st.javítandó':'Needs revision', 'st.elfogadva':'Accepted',
+  'f.new':'New write-up', 'f.editing':'Editing a saved write-up', 'f.untitled':'New source, no title yet',
+  'f.helpAll':'Show help for every field', 'f.save':'Save', 'f.submit':'Save and submit to supervisor', 'f.resubmit':'Save and resubmit',
+  'f.prev':'Previous block', 'f.next':'Next: {b}', 'f.block':'Block {i} of {n}', 'f.filled':'{m}/{n} filled in',
+  'f.dirty':'Unsaved changes (draft on this computer)', 'f.savedAt':'Saved: {t}', 'f.saved':'Saved.',
+  'f.submitted':'Saved and submitted to your supervisor.', 'f.needRef':'The Reference field is required for saving.',
+  'f.saveFail':'Saving failed: {m} The draft has been kept on this computer.',
+  'f.confirmNew':'You have unsaved changes. Start a new write-up anyway? The current draft will be lost.',
+  'f.confirmOpen':'The current write-up has unsaved changes. Open this one instead?',
+  'f.closed':'<b>This topic is closed.</b> You can read the write-ups, but saving is not possible.',
+  'f.comment':'Supervisor comment', 'f.nk':'not reported', 'f.nkTip':'The source gives no information on this', 'f.nkVal':'nem közli',
+  'f.single':'single choice', 'f.multi':'multiple choice', 'f.help':'Help', 'f.example':'Example:',
+  'f.doiBtn':'Fill in from DOI', 'f.doiBusy':'Fetching…', 'f.doiBad':'This does not look like a valid DOI. A DOI starts with 10., e.g. 10.1016/j.foodpol…',
+  'f.doi404':'Crossref does not know this DOI. Check it, or fill in the fields manually.',
+  'f.doiDone':'Filled in: {f}.', 'f.doiKept':' Fields already filled in ({f}) were not overwritten.', 'f.doiCheck':' Please check the reference.',
+  'f.doiNone':'All related fields were already filled in; nothing was overwritten.', 'f.doiFail':'Fetching the DOI failed ({m}). Please fill in the fields manually.',
+  'f.scaleLegend':'1: hardly usable · 3: moderate · 5: reliable key source', 'f.tagSugg':'Tags used before:',
+  'f.notMember':'You are the supervisor of this topic, so you review write-ups rather than write them.',
+  'l.search':'Search by author, title, tag or any text…', 'l.all':'All', 'l.refresh':'Refresh', 'l.export':'Download as spreadsheet',
+  'l.count':'{n} write-up(s)', 'l.hits':'{n} match(es)', 'l.noRef':'(no reference)', 'l.noMatch':'No write-up matches the filter.',
+  'l.loading':'Loading…', 'l.empty':'No write-ups in this topic yet.', 'l.hasComment':'comment',
+  'd.by':'Written by: {n}', 'd.created':'created {t}', 'd.modified':'modified {t}', 'd.empty':'not filled in',
+  'd.close':'Close', 'd.edit':'Open for editing', 'd.delete':'Delete', 'd.confirmDelete':'Delete this write-up? Neither the supervisor nor the students will see it any more.',
+  'd.deleted':'The write-up has been deleted.', 'd.extra':'Other columns in the spreadsheet',
+  'rv.title':'Supervisor review', 'rv.ph':'Comment for the student (what to add, what to correct, what works well)…',
+  'rv.save':'Save review', 'rv.saved':'Review saved; the student sees it when opening the write-up.', 'rv.when':'Last review: {t}',
+  't.newTitle':'New topic', 't.editTitle':'Topic details', 't.cim':'Topic title', 't.cimPh':'e.g. Anna Kovács, BSc thesis: consumer trust in short food supply chains',
+  't.leiras':'Short description (optional)', 't.leirasPh':'The research question, the focus, or anything that guides the student.',
+  't.kepzes':'Level of study', 't.students':'Students’ email addresses', 't.studentsNote':'One address per line (commas or spaces also work). You can add students later as well.',
+  't.create':'Create topic', 't.save':'Save', 't.cancel':'Cancel', 't.needTitle':'Please enter the topic title.', 't.saved':'Topic details saved.',
+  't.created':'The topic has been created.',
+  'm.topic':'Topic', 'm.edit':'Edit', 'm.close':'Close topic', 'm.reopen':'Reopen topic', 'm.closedNote':'In a closed topic students can only read.',
+  'm.confirmClose':'Close the topic? Students will only be able to read the write-ups. You can reopen it at any time.',
+  'm.students':'Students', 'm.created':'Created: {t}', 'm.level':'Level of study: {l}', 'm.noStudents':'No students in this topic yet.',
+  'm.registered':'registered', 'm.pending':'invitation pending, valid until {d}', 'm.expired':'invitation expired or lost, create a new one',
+  'm.newInvite':'New invitation link', 'm.resetLink':'Password reset link', 'm.remove':'Remove',
+  'm.confirmRemove':'Remove {e} from the topic? Their existing write-ups are kept.',
+  'm.removed':'The student has been removed from the topic.', 'm.addPh':'student@example.com (several addresses allowed)', 'm.add':'Add student',
+  'm.you':'(you)',
+  'iv.title':'Invitation links', 'iv.note':'The links are shown only now. If one gets lost, you can create a new one on the “Topic and students” tab at any time (the old one then stops working).',
+  'iv.copy':'Copy', 'iv.mail':'Email', 'iv.copied':'Link copied to the clipboard.', 'iv.until':'Valid until {d}, single use.',
+  'iv.already':'Already a registered user: the topic appears in their list, no link needed.', 'iv.member':'Was already a member of the topic.',
+  'iv.resetNote':'Password reset link for an already registered student.',
+  'ac.title':'Account', 'ac.name':'Name', 'ac.saveName':'Save name', 'ac.nameSaved':'Name saved.', 'ac.pwTitle':'Change password',
+  'ac.oldPw':'Current password', 'ac.newPw':'New password', 'ac.newPw2':'Repeat new password', 'ac.savePw':'Change password',
+  'ac.pwSaved':'Password changed. You will need to sign in again on your other devices.', 'ac.email':'Email: {e}', 'ac.role':'Role: {r}',
+  'ex.title':'Download as spreadsheet', 'ex.sub':'Choose the columns. The browser remembers your choice for the next download.',
+  'ex.rows':'Write-ups', 'ex.all':'All ({n})', 'ex.view':'Filtered only ({n})', 'ex.cols':'Columns',
+  'ex.matrix':'Synthesis matrix', 'ex.matrixTip':'Reference, year, type, main findings, appraisal and use', 'ex.allCols':'All fields', 'ex.none':'None',
+  'ex.sum':'{r} write-up(s) · {c} column(s)', 'ex.excel':'Download Excel', 'ex.admin':'Administrative data', 'ex.busy':'Preparing…',
+  'ex.done':'Downloaded: {r} write-up(s), {c} column(s).', 'ex.csvDone':'Downloaded: {r} write-up(s), {c} column(s) (CSV, semicolon separated).',
+  'ex.fail':'The Excel file could not be created ({m}). Try the CSV button; Excel opens that too.', 'ex.libFail':'the Excel module did not load', 'ex.sheet':'Write-ups',
+  'col.Feldolgozó':'Written by', 'col.Állapot':'Status', 'col.Témavezetői megjegyzés':'Supervisor comment', 'col.Létrehozva':'Created', 'col.Módosítva':'Modified',
+  'sync.ok':'Synced.', 'sync.fail':'Could not reach the server: {m}',
+  'err.banner':'<b>Cannot reach the server.</b> {m} Your work is kept as a draft on this computer.', 'err.retry':'Retry',
+  'mail.subjInvite':'Meghívó: szakirodalom-feldolgozás / Invitation: literature review',
+  'mail.subjReset':'Új jelszó beállítása / Set a new password',
+  'mail.invite':'Dear Student,\n\nI have invited you to the shared literature review workspace of the topic “{t}”. Please set your own password using the link below (you are registering with {e}). The link is valid until {d} and can be used once:\n\n{l}\n\nAfterwards you can sign in at {u}.\n\nBest regards,\n{n}',
+  'mail.reset':'Dear Student,\n\nYou can set a new password for the literature review workspace ({e}) using the link below. The link is valid until {d} and can be used once:\n\n{l}\n\nBest regards,\n{n}',
+  'err.NET':'The server cannot be reached. Please check your internet connection.', 'err.BADRESP':'The server did not respond as expected.',
+  'err.BADREQ':'The request could not be processed.', 'err.LOGIN':'Wrong email address or password.',
+  'err.LOCKED':'Too many failed attempts. Please try again in 15 minutes.', 'err.EXISTS':'An account with this email address already exists. Please sign in.',
+  'err.NOCODE':'Supervisor registration is currently disabled. Please contact the administrator.', 'err.CODE':'Wrong supervisor registration code.',
+  'err.EMAIL':'Invalid email address.', 'err.NAME':'Please enter your name.', 'err.PASSWORD':'The password must be at least 8 characters long.',
+  'err.INVITE':'This link is not valid.', 'err.INVITEUSED':'This link has already been used or withdrawn. If you have registered, please sign in.',
+  'err.INVITEEXP':'This link has expired. Ask your supervisor for a new one.', 'err.FORBIDDEN':'You do not have permission for this.',
+  'err.CLOSED':'This topic is closed; saving is not possible. Please contact your supervisor.', 'err.NOTFOUND':'Not found.',
+  'err.DELETED':'This write-up has been deleted in the meantime.', 'err.WRONGPW':'The current password is not correct.',
+  'err.RESETDENIED':'Only the administrator can reset this user’s password.', 'err.AUTH':'Your session has expired. Please sign in again.', 'err.SERVER':'Server error.'
+}};
+
+/* ================= Sablon / Template =================
+   A mező kulcsa (k) egyben a táblázat oszlopneve: utólag ne nevezd át.
+   type: text | textarea | doi | choice (set, single) | scale | tags;  nk:true = van „nem közli” gomb */
+const CHOICES = {
+  stype:[['empirikus','Empirikus kutatás','Empirical study'],['review','Szakirodalmi áttekintés (review)','Literature review'],
+    ['elmeleti','Elméleti, koncepcionális írás','Theoretical or conceptual paper'],['eset','Esettanulmány','Case study'],
+    ['konyv','Könyv vagy könyvfejezet','Book or book chapter'],['jelentes','Jelentés, szakmai vagy szakpolitikai anyag','Report, professional or policy document'],
+    ['egyeb','Egyéb','Other']],
+  method:[['kvanti','Kvantitatív','Quantitative','számszerű adatok, statisztika','numerical data, statistics'],
+    ['kvali','Kvalitatív','Qualitative','interjú, fókuszcsoport, szövegelemzés','interviews, focus groups, text analysis'],
+    ['vegyes','Vegyes','Mixed methods','',''],['nemempirikus','Nem empirikus','Non-empirical','áttekintés, elméleti írás','review, theoretical paper']],
+  relevance:[['kulcs','Kulcsforrás','Key source','a dolgozat egyik alapja','a cornerstone of the thesis'],
+    ['hasznos','Hasznos','Useful','több ponton hivatkozom','cited at several points'],
+    ['hatter','Háttér','Background','egy-egy hivatkozás','an occasional citation'],['nem','Nem használom','Not used','','']],
+  chapter:[['bevezetes','Bevezetés','Introduction'],['szakirodalom','Szakirodalmi áttekintés','Literature review'],
+    ['modszertan','Anyag és módszer','Materials and methods'],['eredmenyek','Eredmények és értékelésük','Results and discussion'],
+    ['kovetkeztetes','Következtetések, javaslatok','Conclusions and recommendations']]
+};
+const TPL = [
+  {hu:['Bibliográfiai adatok','Kezdd a DOI-val: a hivatkozást, az évet és a megjelenés helyét az eszköz kitölti helyetted.'],
+   en:['Bibliographic details','Start with the DOI: the tool fills in the reference, the year and the outlet for you.'], f:[
+    {k:'DOI', type:'doi',
+     hu:['DOI','Írd be vagy másold be a forrás DOI-ját, majd kattints a „Kitöltés DOI alapján” gombra. A Hivatkozás, az Év és a Megjelenés helye kitöltődik (a már kitöltött mezőket nem írja felül). Ha nincs DOI (például könyvnél vagy jelentésnél), hagyd üresen, és töltsd ki kézzel a többi mezőt.','10.xxxx/xxxxx (a https://doi.org/ előtag is maradhat)'],
+     en:['DOI','Type or paste the DOI of the source, then click “Fill in from DOI”. The Reference, Year and Outlet fields are filled in (fields you have already filled in are not overwritten). If there is no DOI (e.g. for a book or a report), leave it empty and fill in the other fields manually.','10.xxxx/xxxxx (the https://doi.org/ prefix may stay)']},
+    {k:'Hivatkozás', type:'textarea', req:true,
+     hu:['Hivatkozás','A forrás teljes hivatkozása abban a stílusban, amelyet a dolgozatodban használsz (a legtöbb szakon APA 7). A DOI alapján kitöltött változatot ellenőrizd: az APA a cikkcímben csak az első szót és a tulajdonneveket írja nagybetűvel.','Szerző, A., & Szerző, B. (2023). A cikk címe. Folyóirat neve, 12(3), 45–60. https://doi.org/…'],
+     en:['Reference','The full reference of the source in the style used in your thesis (APA 7 in most programmes). Check the version filled in from the DOI: APA capitalises only the first word and proper nouns in article titles.','Author, A., & Author, B. (2023). Title of the article. Journal Name, 12(3), 45–60. https://doi.org/…']},
+    {k:'Év', type:'text', hu:['Év','A megjelenés éve.','2023'], en:['Year','Year of publication.','2023']},
+    {k:'Megjelenés helye', type:'text',
+     hu:['Megjelenés helye','Folyóiratcikknél a folyóirat teljes neve, könyvnél a kiadó, jelentésnél a kiadó szervezet vagy a honlap.','Journal of Cleaner Production'],
+     en:['Outlet','For a journal article the full journal name, for a book the publisher, for a report the issuing organisation or website.','Journal of Cleaner Production']},
+    {k:'Forrás típusa', type:'choice', set:'stype', single:true,
+     hu:['Forrás típusa','Milyen jellegű a forrás. Ehhez igazodik, mire figyelj a következő blokkban: empirikus kutatásnál az adatokra és a módszerre, review-nál a feldolgozott irodalom körére, elméleti írásnál a fogalmakra és az érvelésre.'],
+     en:['Type of source','What kind of source this is. It tells you what to focus on in the next block: data and methods for an empirical study, the scope of the literature covered for a review, concepts and arguments for a theoretical paper.']},
+    {k:'Kulcsszavak', type:'text',
+     hu:['Kulcsszavak','A szerzők által megadott kulcsszavak, vesszővel elválasztva. A saját keresésed finomításához hasznosak.','consumer trust, food supply chain, survey'],
+     en:['Keywords','The keywords given by the authors, separated by commas. Useful for refining your own search.','consumer trust, food supply chain, survey']}
+  ]},
+  {hu:['A forrás tartalma','Mit vizsgáltak a szerzők, hogyan, és mire jutottak. Saját szavaiddal írd, ne másold ki a szöveget: így később közvetlenül fel tudod használni, és elkerülöd a plágiumot.'],
+   en:['Content of the source','What the authors studied, how, and what they found. Write in your own words instead of copying the text: you can then reuse it directly, and you avoid plagiarism.'], f:[
+    {k:'Cél vagy kutatási kérdés', type:'textarea', nk:true,
+     hu:['Cél vagy kutatási kérdés','Mire keresnek választ a szerzők, 1–2 mondatban. Ha nincs kimondott kutatási kérdés, írd le, mit vizsgálnak ténylegesen.'],
+     en:['Aim or research question','What the authors want to find out, in 1–2 sentences. If there is no explicit research question, describe what they actually examine.']},
+    {k:'Módszertani megközelítés', type:'choice', set:'method', single:true,
+     hu:['Módszertani megközelítés','Milyen típusú módszerrel dolgoztak. Nem empirikus forrásnál (review, elméleti írás) a „Nem empirikus” lehetőséget válaszd.'],
+     en:['Methodological approach','The type of method used. For a non-empirical source (review, theoretical paper) choose “Non-empirical”.']},
+    {k:'Módszer és adatok', type:'textarea', nk:true,
+     hu:['Módszer és adatok','Empirikus kutatásnál: kiket vagy mit vizsgáltak (minta, ország, időszak), milyen adatgyűjtéssel és elemzési módszerrel. Review-nál: hány forrást és milyen szempontok szerint dolgoztak fel. Elméleti írásnál: milyen elméletre vagy modellre építenek.','312 magyar fogyasztó online kérdőíve (2022), strukturális egyenletek modellje (SEM)'],
+     en:['Methods and data','For an empirical study: who or what was studied (sample, country, period), with what data collection and analysis method. For a review: how many sources were covered and by what criteria. For a theoretical paper: which theory or model it builds on.','Online survey of 312 Hungarian consumers (2022), structural equation modelling (SEM)']},
+    {k:'Fő megállapítások', type:'textarea',
+     hu:['Fő megállapítások','A forrás legfontosabb eredményei vagy állításai 3–5 mondatban, saját szavaiddal. Úgy írd meg, hogy fél év múlva a forrás újraolvasása nélkül is értsd.'],
+     en:['Main findings','The most important results or claims of the source in 3–5 sentences, in your own words. Write it so that you understand it in six months without rereading the source.']},
+    {k:'Fontos fogalmak és definíciók', type:'textarea',
+     hu:['Fontos fogalmak és definíciók','A témád szempontjából fontos fogalmak, ahogy a szerzők meghatározzák őket. Ha szó szerint idézel, tedd idézőjelbe, és írd mellé az oldalszámot.','„Bizalom: …” (p. 4)'],
+     en:['Key concepts and definitions','Concepts important for your topic, as the authors define them. If you quote word for word, use quotation marks and add the page number.','“Trust: …” (p. 4)']}
+  ]},
+  {hu:['Kritikai értékelés','Innentől a saját véleményed következik. Nem kell mindenáron hibát keresned, de gondold végig, mennyire támaszkodhatsz a forrásra.'],
+   en:['Critical appraisal','From here on it is your own opinion. You do not have to find faults at all costs, but think about how far you can rely on the source.'], f:[
+    {k:'Erősségek', type:'textarea',
+     hu:['Erősségek','Miben jó ez a forrás: friss, nagy vagy jól leírt minta, világos érvelés, jól használható összefoglaló táblázat vagy ábra.'],
+     en:['Strengths','What is good about this source: recent, large or well-described sample, clear argument, useful summary table or figure.']},
+    {k:'Korlátok', type:'textarea',
+     hu:['Korlátok','Amit a szerzők maguk korlátként említenek, és amit te látsz gyengeségnek: kis vagy egyoldalú minta, régi adat, más ország vagy ágazat, nem lektorált forrás.'],
+     en:['Limitations','Limitations mentioned by the authors and weaknesses you see yourself: small or one-sided sample, old data, a different country or sector, a source that was not peer reviewed.']},
+    {k:'Megbízhatóság (1-5)', type:'scale',
+     hu:['Megbízhatóság (1–5)','Mennyire építhetsz erre a forrásra a dolgozatodban. 1: alig használható. 3: közepes, óvatosan hivatkozható. 5: megbízható alapforrás.'],
+     en:['Reliability (1–5)','How far you can build on this source in your thesis. 1: hardly usable. 3: moderate, cite with care. 5: reliable key source.']},
+    {k:'Értékelés indoklása', type:'text',
+     hu:['Értékelés indoklása','Egy mondat arról, miért ezt a pontszámot adtad.'], en:['Reason for the rating','One sentence on why you gave this score.']}
+  ]},
+  {hu:['Felhasználás a dolgozatban','Hogyan hasznosul a forrás a szakdolgozatodban vagy a diplomamunkádban. Ez köti össze az olvasást az írással.'],
+   en:['Use in your thesis','How the source will be used in your BSc or MSc thesis. This links reading to writing.'], f:[
+    {k:'Relevancia', type:'choice', set:'relevance', single:true,
+     hu:['Relevancia','Mennyire fontos ez a forrás a dolgozatod szempontjából.'], en:['Relevance','How important this source is for your thesis.']},
+    {k:'Dolgozat fejezete', type:'choice', set:'chapter',
+     hu:['Dolgozat fejezete','Mely fejezetekben fogod felhasználni.'], en:['Thesis chapter','Which chapters you will use it in.']},
+    {k:'Kapcsolódás a saját témához', type:'textarea',
+     hu:['Kapcsolódás a saját témához','Melyik kutatási kérdésedhez, hipotézisedhez vagy gondolatmenetedhez ad muníciót, és pontosan mit.'],
+     en:['Link to your own topic','Which of your research questions, hypotheses or arguments it supports, and exactly how.']},
+    {k:'Címkék', type:'tags',
+     hu:['Címkék','Saját címkék a források csoportosításához (például egy alfejezet vagy altéma neve), vesszővel elválasztva. A témában már használt címkék alul megjelennek, kattintással hozzáadhatod őket.','bizalom, címkézés, fiatal fogyasztók'],
+     en:['Tags','Your own tags for grouping sources (e.g. the name of a subsection or subtopic), separated by commas. Tags already used in the topic are listed below; click to add them.','trust, labelling, young consumers']},
+    {k:'Idézetek', type:'textarea',
+     hu:['Idézetek','Legfeljebb 2–3 szó szerinti idézet, mindegyik oldalszámmal. Csak akkor, ha a pontos megfogalmazás fontos.','„…” (p. 12)'],
+     en:['Quotations','At most 2–3 verbatim quotations, each with a page number. Only when the exact wording matters.','“…” (p. 12)']},
+    {k:'Továbbolvasandó források', type:'textarea',
+     hu:['Továbbolvasandó források','Hólabda-módszer: 2–4 hivatkozott forrás, amelyet érdemes megkeresned és feldolgoznod.','Kovács (2019), az alapmodell; Smith és mtsai (2021), európai összehasonlítás'],
+     en:['Sources to follow up','Snowballing: 2–4 cited sources worth finding and writing up.','Kovács (2019), the original model; Smith et al. (2021), European comparison']},
+    {k:'Kérdés a témavezetőnek', type:'textarea',
+     hu:['Kérdés a témavezetőnek','Ami nem volt világos, vagy amiről egyeztetni szeretnél. A témavezetőd a feldolgozás megnyitásakor látja.'],
+     en:['Question for your supervisor','Anything unclear, or anything you would like to discuss. Your supervisor sees it when opening the write-up.']}
+  ]}
+];
+const FIELDS = TPL.flatMap(b => b.f);
+const fieldDef = k => FIELDS.find(f => f.k === k);
+const META_COLS = ['Feldolgozó', 'Állapot', 'Témavezetői megjegyzés', 'Létrehozva', 'Módosítva'];
+const MATRIX = ['Hivatkozás','Év','Megjelenés helye','Forrás típusa','Módszertani megközelítés','Módszer és adatok','Fő megállapítások','Megbízhatóság (1-5)','Relevancia','Dolgozat fejezete','Címkék','Feldolgozó','Állapot'];
+const STATUSES = ['piszkozat', 'beadva', 'javítandó', 'elfogadva'];
+const ST_CLS = {piszkozat:'st-draft', beadva:'st-sub', 'javítandó':'st-rev', elfogadva:'st-acc'};
+const LEVELS = ['BSc', 'MSc', 'egyéb'];
+
+/* ================= Segédfüggvények ================= */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+function t(k, v){
+  let s = I18N[S.lang][k]; if (s == null) s = I18N.hu[k]; if (s == null) s = k;
+  if (v) s = s.replace(/\{(\w+)\}/g, (m, x) => v[x] == null ? m : String(v[x]));
+  return s;
+}
+// HTML-be szánt szöveg: a sablon jelölése marad, a behelyettesített értékek escape-elve
+function th(k, v){
+  const e = {}; if (v) for (const x in v) e[x] = esc(v[x]);
+  return t(k, e);
+}
+const L = o => o[S.lang] || o.hu;              // [cím, súgó, példa] a mező/blokk nyelvén
+const fLabel = k => { const f = fieldDef(k); return f ? L(f)[0] : (I18N[S.lang]['col.' + k] || k); };
+function choiceLabel(set, id){
+  const c = (CHOICES[set] || []).find(x => x[0] === id);
+  return c ? (S.lang === 'en' ? c[2] : c[1]) : id;
+}
+function choiceDesc(set, id){
+  const c = (CHOICES[set] || []).find(x => x[0] === id);
+  return c ? (S.lang === 'en' ? c[4] : c[3]) || '' : '';
+}
+function uid(){
+  try{ if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
+const p2 = n => String(n).padStart(2, '0');
+function nowStr(){ const d = new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`; }
+function dateStr(ms){ const d = new Date(Number(ms)); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+function filled(v){ return Array.isArray(v) ? v.length > 0 : String(v == null ? '' : v).trim() !== ''; }
+function splitList(v){
+  if (Array.isArray(v)) return v;
+  return String(v == null ? '' : v).split(',').map(s => s.trim()).filter(Boolean);
+}
+let toastTimer;
+function toast(msg, isErr){
+  let el = $('.toast');
+  if (!el){ el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.textContent = msg; el.classList.toggle('err', !!isErr); el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, isErr ? 6500 : 3200);
+}
+function download(name, blob){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(e2){}
+    ta.remove(); return ok;
+  }
+}
+const siteUrl = () => location.origin + location.pathname;
+const inviteUrl = tok => siteUrl() + '#invite=' + tok;
+function statusBadge(st){ return st ? `<span class="badge ${ST_CLS[st] || ''}">${esc(t('st.' + st))}</span>` : ''; }
+const lvlLabel = l => t('lvl.' + (LEVELS.includes(l) ? l : 'egyéb'));
+
+/* ================= Állapot ================= */
+const S = {
+  lang: store.get('sz_lang', /^hu\b/i.test(navigator.language || 'hu') ? 'hu' : 'en'),
+  token:'', lejar:0, user:null, loginTab:'login', loginMsg:'', invite:null,
+  topics:[], records:[], loaded:false, status:'loading', statusMsg:'', lastSync:'',
+  topicId:'', view:'home', current:null, dirty:false, helpAll:store.get('sz_helpall', false), helpOpen:{},
+  q:'', fStatus:'all', detail:null, export:null, modal:null
+};
+const draftKey = () => `sz_draft_${S.user.email}_${S.topicId}`;
+const dirtyKey = () => `sz_dirty_${S.user.email}_${S.topicId}`;
+const curTopic = () => S.topics.find(x => x.id === S.topicId) || null;
+const topicRecords = () => S.records.filter(r => String(r['téma']) === S.topicId);
+const findRecord = id => S.records.find(r => String(r.id) === String(id));
+const canWrite = tp => !!(tp && tp.tag && tp.aktiv);
+
+/* ================= Szerver ================= */
+function errText(code, serverMsg){
+  if (S.lang === 'hu' && serverMsg) return serverMsg;
+  const k = 'err.' + code;
+  return I18N[S.lang][k] || serverMsg || I18N[S.lang]['err.SERVER'];
+}
+function mkErr(code, serverMsg, auth){ const e = new Error(errText(code, serverMsg)); e.code = code; e.auth = !!auth; return e; }
+async function api(action, data){
+  const body = Object.assign({action, token:S.token}, data || {});
+  let r, j;
+  try{
+    r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body)});
+  }catch(e){ throw mkErr('NET'); }
+  try{ j = await r.json(); }catch(e){ throw mkErr('BADRESP'); }
+  if (!j.ok){
+    if (j.code === 'AUTH' && S.token){ const err = mkErr('AUTH', j.error, true); logout(err.message); throw err; }
+    throw mkErr(j.code, j.error);
+  }
+  return j;
+}
+
+let firstSync = false;
+async function sync(quiet){
+  S.status = 'loading'; renderHeader();
+  try{
+    const j = await api('getAll');
+    S.user = j.user || S.user; S.topics = j.topics || []; S.records = j.records || []; S.loaded = true;
+    S.status = 'ok'; S.statusMsg = ''; S.lastSync = nowStr().slice(11);
+    const auth = store.get('sz_auth', null); if (auth){ auth.user = S.user; store.set('sz_auth', auth); }
+    if (S.topicId && !curTopic()){ S.topicId = ''; S.view = 'home'; S.current = null; }
+    if (firstSync){
+      firstSync = false;
+      const last = store.get('sz_topic_' + S.user.email, '');
+      if (last && S.topics.some(x => x.id === last)) openTopic(last, true);
+      else if (S.user.szerep !== 'tv' && S.topics.length === 1) openTopic(S.topics[0].id, true);
+    }
+    if (S.view === 'form' && !canWriteView()) S.view = 'list';
+    if (!quiet) toast(t('sync.ok'));
+  }catch(e){
+    if (e.auth) return;
+    S.status = 'err'; S.statusMsg = e.message;
+    if (!quiet) toast(t('sync.fail', {m:e.message}), true);
+  }
+  renderHeader();
+  const typing = document.activeElement && document.activeElement.closest && document.activeElement.closest('#block,.modal');
+  if (!typing){ renderView(); renderDetail(); renderModal(); }
+}
+const canWriteView = () => { const tp = curTopic(); return !!(tp && tp.tag); };
+
+/* ================= Belépés, kilépés ================= */
+function saveAuth(j){
+  const auth = {token:j.token, lejar:j.lejar, user:j.user};
+  store.set('sz_auth', auth); return auth;
+}
+function enter(auth){
+  S.token = auth.token; S.lejar = auth.lejar; S.user = auth.user;
+  S.topics = []; S.records = []; S.loaded = false; S.topicId = ''; S.view = 'home'; S.current = null; S.dirty = false;
+  S.detail = null; S.export = null; S.modal = null; S.loginMsg = '';
+  try{ if (location.hash) history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  document.title = t('app');
+  renderShell(); renderHeader(); renderView();
+  firstSync = true; sync(true);
+}
+function logout(msg){
+  store.del('sz_auth');
+  S.token = ''; S.user = null; S.detail = null; S.export = null; S.modal = null; S.dirty = false; S.topicId = '';
+  S.loginMsg = msg || ''; S.loginTab = 'login';
+  renderDetail(); renderExport(); renderModal();
+  renderLogin();
+}
+function langBtn(){ return `<button type="button" class="langbtn" data-act="lang" title="${esc(t('other'))}">${esc(t('otherShort'))}</button>`; }
+function renderLogin(){
+  document.title = t('app');
+  document.documentElement.lang = S.lang;
+  const reg = S.loginTab === 'reg';
+  $('#app').innerHTML = `<div class="loginwrap"><div class="card login">
+    ${langBtn()}
+    <h1>${esc(t('app'))}</h1>
+    <p class="sub">${esc(t('appSub'))}</p>
+    ${!API ? `<div class="banner err"><p>${t('lg.notConfigured')}</p></div>` : ''}
+    ${S.loginMsg ? `<div class="banner info"><p>${esc(t('lg.loggedOut', {m:S.loginMsg}))}</p></div>` : ''}
+    <div class="seg"><button type="button" class="${reg ? '' : 'on'}" data-act="lg-tab" data-tab="login">${esc(t('lg.tabLogin'))}</button><button type="button" class="${reg ? 'on' : ''}" data-act="lg-tab" data-tab="reg">${esc(t('lg.tabReg'))}</button></div>
+    ${reg ? `<form id="regForm" class="frm" autocomplete="on">
+      <div><label for="rgName">${esc(t('lg.name'))}</label><input type="text" id="rgName" autocomplete="name"></div>
+      <div><label for="rgEmail">${esc(t('lg.email'))}</label><input type="email" id="rgEmail" autocomplete="username" spellcheck="false"></div>
+      <div><label for="rgPw">${esc(t('lg.pw'))}</label><input type="password" id="rgPw" autocomplete="new-password"><div class="note">${esc(t('lg.pwNote'))}</div></div>
+      <div><label for="rgPw2">${esc(t('lg.pw2'))}</label><input type="password" id="rgPw2" autocomplete="new-password"></div>
+      <div><label for="rgCode">${esc(t('lg.code'))}</label><input type="password" id="rgCode" autocomplete="off"><div class="note">${esc(t('lg.codeNote'))}</div></div>
+      <button class="btn primary" type="submit" id="rgBtn" ${API ? '' : 'disabled'}>${esc(t('lg.register'))}</button>
+      <div class="note err" id="rgMsg" role="alert"></div>
+    </form>` : `<form id="loginForm" class="frm" autocomplete="on">
+      <div><label for="lgEmail">${esc(t('lg.email'))}</label><input type="email" id="lgEmail" name="username" autocomplete="username" spellcheck="false" value="${esc(store.get('sz_email', ''))}"></div>
+      <div><label for="lgPw">${esc(t('lg.pw'))}</label><input type="password" id="lgPw" name="password" autocomplete="current-password"></div>
+      <button class="btn primary" type="submit" id="lgBtn" ${API ? '' : 'disabled'}>${esc(t('lg.login'))}</button>
+      <div class="note err" id="lgMsg" role="alert"></div>
+    </form>`}
+    <p class="foot">${esc(t('lg.foot'))}</p>
+  </div></div>`;
+  const f = reg ? $('#rgName') : ($('#lgEmail').value ? $('#lgPw') : $('#lgEmail')); if (f) f.focus();
+}
+async function doLogin(){
+  const email = $('#lgEmail').value.trim(), pw = $('#lgPw').value;
+  const msg = $('#lgMsg'), btn = $('#lgBtn');
+  if (!email || !pw){ msg.textContent = t('lg.fillAll'); return; }
+  btn.disabled = true; btn.textContent = t('lg.busy'); msg.textContent = '';
+  try{
+    const j = await api('login', {email, jelszo:pw});
+    store.set('sz_email', email);
+    enter(saveAuth(j));
+  }catch(err){ msg.textContent = err.message; btn.disabled = false; btn.textContent = t('lg.login'); }
+}
+async function doRegister(){
+  const nev = $('#rgName').value.trim(), email = $('#rgEmail').value.trim(), pw = $('#rgPw').value, pw2 = $('#rgPw2').value, kod = $('#rgCode').value.trim();
+  const msg = $('#rgMsg'), btn = $('#rgBtn');
+  if (!nev || !email || !pw || !pw2 || !kod){ msg.textContent = t('lg.fillAll'); return; }
+  if (pw.length < 8){ msg.textContent = t('lg.pwShort'); return; }
+  if (pw !== pw2){ msg.textContent = t('lg.pwMismatch'); return; }
+  btn.disabled = true; btn.textContent = t('lg.busy'); msg.textContent = '';
+  try{
+    const j = await api('registerSupervisor', {nev, email, jelszo:pw, kod});
+    store.set('sz_email', email);
+    enter(saveAuth(j));
+  }catch(err){ msg.textContent = err.message; btn.disabled = false; btn.textContent = t('lg.register'); }
+}
+
+/* ---- Meghívó / jelszó-visszaállító link ---- */
+async function startInvite(tok){
+  S.invite = {tok, info:null, err:''};
+  renderInvite();
+  try{
+    const j = await api('inviteInfo', {meghivo:tok});
+    S.invite.info = j.meghivo;
+  }catch(e){ S.invite.err = e.message; S.invite.code = e.code; }
+  renderInvite();
+}
+function renderInvite(){
+  document.title = t('app');
+  document.documentElement.lang = S.lang;
+  const iv = S.invite, m = iv.info;
+  const reset = m && m.tipus === 'reset';
+  let body;
+  if (!m && !iv.err) body = `<p class="muted">${esc(t('inv.checking'))}</p>`;
+  else if (iv.err) body = `<div class="banner err"><p>${esc(iv.err)}</p></div><button class="btn primary" data-act="to-login">${esc(t('inv.toLogin'))}</button>`;
+  else if (!reset && m.vanFiok) body = `<div class="banner info"><p>${esc(t('inv.hasAccount', {e:m.email}))}</p></div><button class="btn primary" data-act="to-login" data-email="${esc(m.email)}">${esc(t('inv.toLogin'))}</button>`;
+  else body = `<div class="invbox">
+      ${m.tema ? `<p>${th('inv.to', {t:m.tema.cim})}</p>${m.temavezeto ? `<p class="muted">${esc(t('inv.tv', {n:m.temavezeto}))}</p>` : ''}` : ''}
+      <p>${reset ? th('inv.resetFor', {e:m.email}) : th('inv.email', {e:m.email})}</p></div>
+    <form id="invForm" class="frm">
+      <input type="email" autocomplete="username" value="${esc(m.email)}" hidden>
+      <div><label for="ivName">${esc(t('lg.name'))}</label><input type="text" id="ivName" autocomplete="name" value="${esc(m.nev)}"></div>
+      <div><label for="ivPw">${esc(t(reset ? 'inv.newPw' : 'lg.pw'))}</label><input type="password" id="ivPw" autocomplete="new-password"><div class="note">${esc(t('lg.pwNote'))}</div></div>
+      <div><label for="ivPw2">${esc(t('lg.pw2'))}</label><input type="password" id="ivPw2" autocomplete="new-password"></div>
+      <button class="btn primary" type="submit" id="ivBtn">${esc(t(reset ? 'inv.resetSubmit' : 'inv.submit'))}</button>
+      <div class="note err" id="ivMsg" role="alert"></div>
+    </form>`;
+  $('#app').innerHTML = `<div class="loginwrap"><div class="card login">${langBtn()}
+    <h1>${esc(t(reset ? 'inv.resetTitle' : 'inv.title'))}</h1><p class="sub">${esc(t('app'))}</p>${body}</div></div>`;
+}
+async function doInvite(){
+  const m = S.invite.info, reset = m.tipus === 'reset';
+  const nev = $('#ivName').value.trim(), pw = $('#ivPw').value, pw2 = $('#ivPw2').value;
+  const msg = $('#ivMsg'), btn = $('#ivBtn');
+  if ((!reset && !nev) || !pw || !pw2){ msg.textContent = t('lg.fillAll'); return; }
+  if (pw.length < 8){ msg.textContent = t('lg.pwShort'); return; }
+  if (pw !== pw2){ msg.textContent = t('lg.pwMismatch'); return; }
+  btn.disabled = true; btn.textContent = t('lg.busy'); msg.textContent = '';
+  try{
+    const j = await api('acceptInvite', {meghivo:S.invite.tok, nev, jelszo:pw});
+    store.set('sz_email', m.email); S.invite = null;
+    enter(saveAuth(j));
+  }catch(err){ msg.textContent = err.message; btn.disabled = false; btn.textContent = t(reset ? 'inv.resetSubmit' : 'inv.submit'); }
+}
+
+/* ================= Keret ================= */
+function renderShell(){
+  document.documentElement.lang = S.lang;
+  $('#app').innerHTML = `
+  <header class="top"><div class="wrap">
+    <div class="toprow">
+      <div class="brand"><h1>${esc(t('app'))}</h1><small id="ctxLine"></small></div>
+      <span class="who" id="who"></span>
+      <button class="pill" id="status" data-act="sync"></button>
+      ${langBtn()}
+      <button class="btn ghost sm" data-act="account">${esc(t('hd.account'))}</button>
+      <button class="btn ghost sm" data-act="logout">${esc(t('hd.logout'))}</button>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </div></header>
+  <main><div class="wrap" id="view"></div></main>`;
+}
+function renderHeader(){
+  if (!$('#tabs') || !S.user) return;
+  const tp = curTopic();
+  const tabs = [`<button class="tab ${S.view === 'home' ? 'on' : ''}" data-act="tab" data-view="home">${esc(t('tab.home'))}</button>`];
+  if (tp){
+    tabs.push('<span class="tabsep"></span>');
+    if (tp.tag) tabs.push(`<button class="tab ${S.view === 'form' ? 'on' : ''}" data-act="tab" data-view="form">${esc(t('tab.form'))}</button>`);
+    tabs.push(`<button class="tab ${S.view === 'list' ? 'on' : ''}" data-act="tab" data-view="list">${esc(t('tab.list'))} <span class="muted">(${topicRecords().length})</span></button>`);
+    if (tp.sajat) tabs.push(`<button class="tab ${S.view === 'members' ? 'on' : ''}" data-act="tab" data-view="members">${esc(t('tab.members'))}</button>`);
+  }
+  $('#tabs').innerHTML = tabs.join('');
+  $('#ctxLine').textContent = tp ? `${tp.cim} · ${lvlLabel(tp.kepzes)}${tp.aktiv ? '' : ' · ' + t('closed')}` : t('appSub');
+  $('#who').innerHTML = `<b>${esc(S.user.nev)}</b><br>${esc(t(S.user.szerep === 'tv' ? 'role.tv' : 'role.h'))}`;
+  const map = {ok:['ok', t('hd.ok') + (S.lastSync ? ' · ' + S.lastSync : '')], loading:['loading', t('hd.loading')], err:['err', t('hd.err')]};
+  const [cls, txt] = map[S.status] || map.loading;
+  const st = $('#status');
+  st.className = 'pill ' + cls;
+  st.innerHTML = `<span class="dot"></span>${esc(txt)}`;
+  st.title = S.status === 'err' ? S.statusMsg : t('hd.syncTip');
+}
+function renderView(){
+  const v = $('#view'); if (!v || !S.user) return;
+  if (S.view === 'form' && curTopic()){ v.innerHTML = renderForm(); updateFormMeta(); }
+  else if (S.view === 'list' && curTopic()) v.innerHTML = renderList();
+  else if (S.view === 'members' && curTopic() && curTopic().sajat) v.innerHTML = renderMembers();
+  else { S.view = 'home'; v.innerHTML = renderHome(); }
+}
+function errBanner(){
+  return S.status === 'err' ? `<div class="banner err"><p>${th('err.banner', {m:S.statusMsg})}</p><button class="btn sm" data-act="sync">${esc(t('err.retry'))}</button></div>` : '';
+}
+function rerenderAll(){
+  // nyelvváltáskor a beírt értékek megmaradnak
+  const vals = {};
+  $$('#app input[id], #app textarea[id], .overlay input[id], .overlay textarea[id]').forEach(el => { if (el.type !== 'checkbox') vals[el.id] = el.value; });
+  if (S.invite) renderInvite();
+  else if (!S.token) renderLogin();
+  else { renderShell(); renderHeader(); renderView(); }
+  renderDetail(); renderExport(); renderModal();
+  for (const id in vals){ const el = document.getElementById(id); if (el) el.value = vals[id]; }
+}
+
+/* ================= Témáim ================= */
+function topicCounts(id){
+  const c = {total:0}; STATUSES.forEach(s => { c[s] = 0; });
+  S.records.forEach(r => { if (String(r['téma']) === id){ c.total++; c[r['Állapot'] || 'piszkozat'] = (c[r['Állapot'] || 'piszkozat'] || 0) + 1; } });
+  return c;
+}
+function renderHome(){
+  const tv = S.user.szerep === 'tv';
+  const list = S.topics.slice().sort((a, b) => (b.aktiv - a.aktiv) || String(b.letrehozva).localeCompare(String(a.letrehozva)));
+  const cards = list.map(tp => {
+    const c = topicCounts(tp.id);
+    const stud = tp.tagok.filter(m => !m.en || !tp.sajat);
+    const pend = tp.sajat ? tp.tagok.filter(m => !m.regisztralt).length : 0;
+    const chips = [`<span class="chip">${esc(t('home.records', {n:c.total}))}</span>`];
+    if (tp.sajat && c.beadva) chips.push(`<span class="badge hot">${esc(t('home.toReview', {n:c.beadva}))}</span>`);
+    if (tp.tag && c['javítandó']) chips.push(`<span class="badge hot">${esc(t('home.toRevise', {n:c['javítandó']}))}</span>`);
+    return `<button class="tcard" data-act="open-topic" data-id="${esc(tp.id)}">
+      <span class="tags"><span class="badge lvl">${esc(lvlLabel(tp.kepzes))}</span>${tp.aktiv ? '' : `<span class="badge closed">${esc(t('closed'))}</span>`}
+        ${tv && tp.sajat && tp.tag ? `<span class="badge role">${esc(t('home.ownTopic'))}</span>` : ''}${tv && !tp.sajat ? `<span class="badge role">${esc(t('home.asStudent'))}</span>` : ''}</span>
+      <h3>${esc(tp.cim)}</h3>
+      ${tp.leiras ? `<span class="ds">${esc(tp.leiras)}</span>` : ''}
+      <span class="ln">${tp.sajat ? esc(t('home.students', {n:stud.length})) + (pend ? ' · ' + esc(t('home.pending', {n:pend})) : '') : esc(t('home.supervisor', {n:tp.temavezeto.nev}))}</span>
+      <span class="tags">${chips.join('')}</span>
+    </button>`;
+  }).join('');
+  const how = tv ? `<div class="hint"><b>${esc(t('home.how'))}</b><ol><li>${esc(t('home.how1'))}</li><li>${esc(t('home.how2'))}</li><li>${esc(t('home.how3'))}</li><li>${esc(t('home.how4'))}</li></ol></div>` : '';
+  return `${errBanner()}
+  <div class="headrow"><div class="intro"><h2>${esc(t('home.title'))}</h2><p>${esc(t(tv ? 'home.introTv' : 'home.introH'))}</p></div>
+    ${tv ? `<button class="btn primary" data-act="topic-new">${esc(t('home.new'))}</button>` : ''}</div>
+  ${list.length ? `<div class="tgrid">${cards}</div>` : `<div class="card empty">${!S.loaded ? esc(t('l.loading')) : esc(t(tv ? 'home.emptyTv' : 'home.emptyH'))}</div>`}
+  ${tv && list.length < 3 ? how : ''}`;
+}
+function openTopic(id, silent){
+  S.topicId = id; store.set('sz_topic_' + S.user.email, id);
+  const tp = curTopic();
+  const d = store.get(draftKey(), null);
+  S.current = (d && d.id && d.fields) ? d : null;
+  if (S.current && !(S.current.step >= 0 && S.current.step < TPL.length)) S.current.step = 0;
+  S.dirty = !!(S.current && store.get(dirtyKey(), false));
+  if (!S.current && tp && tp.tag) S.current = newCurrent();
+  S.q = ''; S.fStatus = 'all'; S.detail = null; S.helpOpen = {};
+  S.view = tp && tp.tag ? (tp.aktiv || S.dirty ? 'form' : 'list') : 'list';
+  if (tp && tp.tag && !tp.aktiv && !S.dirty) S.view = 'list';
+  if (!silent){ renderHeader(); renderView(); window.scrollTo(0, 0); }
+}
+
+/* ================= Feldolgozás ================= */
+function newCurrent(){ return {id:uid(), fields:{}, step:0, saved:false, savedAt:''}; }
+function saveDraft(){ if (S.current) store.set(draftKey(), S.current); }
+function setDirty(v){ S.dirty = v; store.set(dirtyKey(), v); }
+function markDirty(){ setDirty(true); saveDraft(); updateFormMeta(); }
+function recordToFields(row){
+  const fields = {};
+  for (const f of FIELDS){
+    const v = row[f.k];
+    if (v == null || v === '') continue;
+    fields[f.k] = (f.type === 'choice' && !f.single) ? splitList(v) : String(v);
+  }
+  return fields;
+}
+function currentTitle(){
+  const h = S.current && S.current.fields['Hivatkozás'];
+  return h ? String(h).split('\n')[0] : t('f.untitled');
+}
+async function saveCurrent(submit){
+  const c = S.current, tp = curTopic(); if (!c || !canWrite(tp)) return;
+  if (!filled(c.fields['Hivatkozás'])){ toast(t('f.needRef'), true); gotoField('Hivatkozás'); return; }
+  const fields = {};
+  for (const f of FIELDS){ const v = c.fields[f.k]; fields[f.k] = Array.isArray(v) ? v.join(', ') : (v == null ? '' : String(v)); }
+  const rec = {id:c.id, tema:S.topicId, fields, bekuld:!!submit};
+  const btns = $$('[data-act="save"],[data-act="submit"]'); btns.forEach(b => { b.disabled = true; });
+  try{
+    const j = await api('saveRecord', {record:rec});
+    upsertCache(rec, j);
+    c.saved = true; c.savedAt = j.modositva || nowStr(); setDirty(false); saveDraft();
+    toast(t(submit ? 'f.submitted' : 'f.saved'));
+  }catch(e){
+    if (!e.auth) toast(t('f.saveFail', {m:e.message}), true);
+  }finally{
+    btns.forEach(b => { b.disabled = false; });
+    if (S.view === 'form'){ renderView(); } renderHeader();
+  }
+}
+function upsertCache(rec, j){
+  const i = S.records.findIndex(r => String(r.id) === rec.id);
+  const prev = i >= 0 ? S.records[i] : null;
+  const when = j.modositva || nowStr();
+  const row = Object.assign({}, prev || {}, rec.fields, {
+    'id':rec.id, 'téma':rec.tema, 'Feldolgozó':(prev && prev['Feldolgozó']) || S.user.nev,
+    'Feldolgozó e-mail':(prev && prev['Feldolgozó e-mail']) || S.user.email,
+    'Létrehozva':(prev && prev['Létrehozva']) || when, 'Módosítva':when, 'Utoljára módosította':S.user.nev,
+    'Állapot':j.allapot || (prev && prev['Állapot']) || 'piszkozat'
+  });
+  if (i >= 0) S.records[i] = row; else S.records.push(row);
+}
+
+/* ---- DOI (Crossref) ---- */
+function cleanDoi(s){ return String(s || '').trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:\s*/i, '').trim(); }
+function stripTags(s){ return String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); }
+function apaAuthors(list){
+  const a = (list || []).filter(x => x.family || x.name).map(x => {
+    if (!x.family) return x.name;
+    const ini = String(x.given || '').split(/\s+/).filter(Boolean)
+      .map(g => g.split('-').map(p => p.replace(/\./g, '').charAt(0).toUpperCase() + '.').join('-')).join(' ');
+    return x.family + (ini ? ', ' + ini : '');
+  });
+  if (!a.length) return '';
+  if (a.length === 1) return a[0];
+  if (a.length <= 20) return a.slice(0, -1).join(', ') + ', & ' + a[a.length - 1];
+  return a.slice(0, 19).join(', ') + ', … ' + a[a.length - 1];
+}
+function crossrefToFields(m, doi){
+  const dp = (m.issued || m['published-print'] || m['published-online'] || {})['date-parts'];
+  const year = dp && dp[0] && dp[0][0] ? String(dp[0][0]) : '';
+  const title = stripTags((m.title || [])[0]);
+  const journal = stripTags((m['container-title'] || [])[0]) || stripTags(m.publisher);
+  const authors = apaAuthors(m.author || m.editor);
+  let ref = authors ? authors + ' ' : '';
+  ref += '(' + (year || 'n.d.') + '). ';
+  if (title) ref += title + (/[.?!]$/.test(title) ? ' ' : '. ');
+  const cont = stripTags((m['container-title'] || [])[0]);
+  if (cont){
+    ref += cont;
+    if (m.volume) ref += ', ' + m.volume + (m.issue ? '(' + m.issue + ')' : '');
+    if (m.page) ref += ', ' + String(m.page).replace(/-/g, '–');
+    else if (m['article-number']) ref += ', ' + m['article-number'];
+    ref += '. ';
+  } else if (m.publisher) ref += stripTags(m.publisher) + '. ';
+  ref += 'https://doi.org/' + doi;
+  return {'Hivatkozás':ref.trim(), 'Év':year, 'Megjelenés helye':journal};
+}
+async function doiLookup(btn){
+  const doi = cleanDoi(S.current.fields['DOI']);
+  if (!/^10\.\d{4,9}\/\S+$/.test(doi)){ toast(t('f.doiBad'), true); return; }
+  btn.disabled = true; const old = btn.textContent; btn.textContent = t('f.doiBusy');
+  try{
+    const r = await fetch('https://api.crossref.org/works/' + encodeURIComponent(doi));
+    if (r.status === 404){ toast(t('f.doi404'), true); return; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const m = (await r.json()).message || {};
+    const got = crossrefToFields(m, doi);
+    S.current.fields['DOI'] = doi;
+    const done = [], kept = [];
+    for (const [k, v] of Object.entries(got)){
+      if (!v) continue;
+      if (filled(S.current.fields[k])) kept.push(fLabel(k)); else { S.current.fields[k] = v; done.push(fLabel(k)); }
+    }
+    const typ = (m.type || '').toLowerCase();
+    if (!filled(S.current.fields['Forrás típusa']) && /book/.test(typ)){ S.current.fields['Forrás típusa'] = 'konyv'; done.push(fLabel('Forrás típusa')); }
+    markDirty(); renderView();
+    if (done.length) toast(t('f.doiDone', {f:done.join(', ')}) + (kept.length ? t('f.doiKept', {f:kept.join(', ')}) : t('f.doiCheck')));
+    else toast(t('f.doiNone'));
+  }catch(e){
+    toast(t('f.doiFail', {m:e.message}), true);
+  }finally{
+    btn.disabled = false; btn.textContent = old;
+  }
+}
+
+/* ---- Űrlap megjelenítése ---- */
+function renderForm(){
+  const tp = curTopic();
+  if (!tp.tag) return `<div class="card empty">${esc(t('f.notMember'))}</div>`;
+  if (!S.current) S.current = newCurrent();
+  const c = S.current, blk = TPL[c.step], last = c.step === TPL.length - 1;
+  const rec = c.saved ? findRecord(c.id) : null;
+  const st = rec ? rec['Állapot'] : '';
+  const can = canWrite(tp);
+  const submitLbl = st === 'javítandó' || st === 'beadva' || st === 'elfogadva' ? t('f.resubmit') : t('f.submit');
+  const comment = rec && filled(rec['Témavezetői megjegyzés']) ? `<div class="banner ${st === 'javítandó' ? 'warn' : 'info'}"><p><span class="lbl">${esc(t('f.comment'))}${rec['Megjegyzés ideje'] ? ' · ' + esc(rec['Megjegyzés ideje']) : ''}</span><span class="cm">${esc(rec['Témavezetői megjegyzés'])}</span></p></div>` : '';
+  return `${errBanner()}${can ? '' : `<div class="banner warn"><p>${t('f.closed')}</p></div>`}${comment}
+  <div class="formbar">
+    <div class="ttl"><div class="eyebrow">${esc(t(c.saved ? 'f.editing' : 'f.new'))} ${statusBadge(st)}</div><div class="nm" id="curTitle">${esc(currentTitle())}</div></div>
+    <label class="toggle"><input type="checkbox" data-act="helpall" ${S.helpAll ? 'checked' : ''}> ${esc(t('f.helpAll'))}</label>
+    <span class="savestate" id="saveState"></span>
+    <button class="btn ghost sm" data-act="new-record">${esc(t('f.new'))}</button>
+    <button class="btn primary" data-act="save" ${can ? '' : 'disabled'}>${esc(t('f.save'))}</button>
+  </div>
+  <div class="progress"><span id="prog" style="width:${progressPct()}%"></span></div>
+  <div class="fgrid">
+    <aside class="steps" id="steps">${renderSteps()}</aside>
+    <section class="card pad" id="block">
+      <div class="blockhead"><div class="eyebrow">${esc(t('f.block', {i:c.step + 1, n:TPL.length}))}</div><h2>${esc(L(blk)[0])}</h2><p>${esc(L(blk)[1])}</p></div>
+      <div class="fields">${blk.f.map(renderField).join('')}</div>
+      <div class="navrow">
+        <button class="btn" data-act="prev" ${c.step === 0 ? 'disabled' : ''}>${esc(t('f.prev'))}</button>
+        <div class="r">${last ? `<button class="btn" data-act="save" ${can ? '' : 'disabled'}>${esc(t('f.save'))}</button><button class="btn primary" data-act="submit" ${can ? '' : 'disabled'}>${esc(submitLbl)}</button>`
+          : `<button class="btn primary" data-act="next">${esc(t('f.next', {b:L(TPL[c.step + 1])[0]}))}</button>`}</div>
+      </div>
+    </section>
+  </div>`;
+}
+function renderSteps(){
+  const c = S.current;
+  return TPL.map((b, i) => {
+    const n = b.f.length, m = b.f.filter(f => filled(c.fields[f.k])).length, done = m === n;
+    return `<button class="step ${i === c.step ? 'on' : ''} ${done ? 'done' : ''}" data-act="goto" data-i="${i}"><span class="num">${done && i !== c.step ? '✓' : i + 1}</span><span class="st"><b>${esc(L(b)[0])}</b><small>${esc(t('f.filled', {m, n}))}</small></span></button>`;
+  }).join('');
+}
+function progressPct(){ return Math.round(100 * FIELDS.filter(f => filled(S.current.fields[f.k])).length / FIELDS.length); }
+function topicTags(){
+  const set = new Map();
+  topicRecords().forEach(r => splitList(r['Címkék']).forEach(x => { const k = x.toLowerCase(); if (!set.has(k)) set.set(k, x); }));
+  return Array.from(set.values()).sort((a, b) => a.localeCompare(b, S.lang));
+}
+function renderField(f){
+  const v = S.current.fields[f.k], k = esc(f.k), [lbl, help, ex] = L(f);
+  const open = S.helpAll || S.helpOpen[f.k];
+  let input = '';
+  if (f.type === 'text') input = `<input type="text" data-k="${k}" value="${esc(v)}" aria-label="${esc(lbl)}">`;
+  else if (f.type === 'textarea') input = `<textarea data-k="${k}" rows="3" aria-label="${esc(lbl)}">${esc(v)}</textarea>`;
+  else if (f.type === 'doi') input = `<div class="doirow"><input type="text" data-k="${k}" value="${esc(v)}" aria-label="${esc(lbl)}" placeholder="10.xxxx/xxxxx" spellcheck="false"><button type="button" class="btn" data-act="doi">${esc(t('f.doiBtn'))}</button></div>`;
+  else if (f.type === 'scale') input = `<div class="scale">${[1,2,3,4,5].map(n => `<button type="button" class="sc ${String(v) === String(n) ? 'on' : ''}" data-act="scale" data-k="${k}" data-n="${n}">${n}</button>`).join('')}</div><div class="scalelegend">${esc(t('f.scaleLegend'))}</div>`;
+  else if (f.type === 'choice'){
+    const sel = f.single ? (filled(v) ? [String(v)] : []) : splitList(v);
+    const list = CHOICES[f.set].map(x => x[0]);
+    for (const s of sel) if (!list.includes(s)) list.push(s);
+    input = `<div class="opts">${list.map(id => { const d = choiceDesc(f.set, id); return `<button type="button" class="opt ${sel.includes(id) ? 'on' : ''}" data-act="opt" data-k="${k}" data-code="${esc(id)}" aria-pressed="${sel.includes(id)}">${esc(choiceLabel(f.set, id))}${d ? `<span class="desc">${esc(d)}</span>` : ''}</button>`; }).join('')}</div>`;
+  }
+  else if (f.type === 'tags'){
+    const have = splitList(v).map(x => x.toLowerCase());
+    const sugg = topicTags().filter(x => !have.includes(x.toLowerCase())).slice(0, 30);
+    input = `<input type="text" data-k="${k}" value="${esc(v)}" aria-label="${esc(lbl)}">${sugg.length ? `<div class="tagsugg">${esc(t('f.tagSugg'))} ${sugg.map(x => `<button type="button" class="mini" data-act="tag-add" data-k="${k}" data-tag="${esc(x)}">+ ${esc(x)}</button>`).join('')}</div>` : ''}`;
+  }
+  const nk = f.nk && (f.type === 'text' || f.type === 'textarea');
+  return `<div class="field" data-field="${k}">
+    <div class="flabel"><label>${esc(lbl)}${f.req ? ' <span class="req">*</span>' : ''}</label>
+      <button type="button" class="hbtn ${open ? 'on' : ''}" data-act="help" data-k="${k}" aria-label="${esc(t('f.help'))}: ${esc(lbl)}" title="${esc(t('f.help'))}">?</button>
+      ${f.type === 'choice' ? `<span class="cattag">${esc(t(f.single ? 'f.single' : 'f.multi'))}</span>` : ''}
+      ${nk ? `<button type="button" class="nkbtn" data-act="nk" data-k="${k}" title="${esc(t('f.nkTip'))}">${esc(t('f.nk'))}</button>` : ''}
+    </div>
+    <div class="help" ${open ? '' : 'hidden'}><p>${esc(help)}</p>${ex ? `<p class="ex"><b>${esc(t('f.example'))}</b> ${esc(ex)}</p>` : ''}</div>
+    ${input}
+  </div>`;
+}
+function fieldEl(k){ return $$('[data-field]').find(e => e.dataset.field === k); }
+function rerenderField(k){
+  const el = fieldEl(k), f = fieldDef(k); if (!el || !f) return;
+  const tmp = document.createElement('div'); tmp.innerHTML = renderField(f);
+  el.replaceWith(tmp.firstElementChild);
+}
+function updateFormMeta(){
+  if (S.view !== 'form' || !S.current) return;
+  const steps = $('#steps'); if (steps) steps.innerHTML = renderSteps();
+  const p = $('#prog'); if (p) p.style.width = progressPct() + '%';
+  const ti = $('#curTitle'); if (ti) ti.textContent = currentTitle();
+  const s = $('#saveState');
+  if (s){
+    if (S.dirty){ s.textContent = t('f.dirty'); s.className = 'savestate dirty'; }
+    else if (S.current.saved){ s.textContent = t('f.savedAt', {t:S.current.savedAt}); s.className = 'savestate'; }
+    else { s.textContent = ''; s.className = 'savestate'; }
+  }
+}
+function gotoField(k){
+  const i = TPL.findIndex(b => b.f.some(f => f.k === k));
+  if (i >= 0 && i !== S.current.step){ S.current.step = i; renderView(); }
+  const el = fieldEl(k); if (el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const inp = $('input,textarea', el); if (inp) inp.focus(); }
+}
+
+/* ================= Feldolgozások listája ================= */
+function recTitle(r){ return String(r['Hivatkozás'] || t('l.noRef')).split('\n')[0]; }
+function listRows(){
+  const q = S.q.trim().toLowerCase();
+  let rows = topicRecords();
+  if (S.fStatus !== 'all') rows = rows.filter(r => (r['Állapot'] || 'piszkozat') === S.fStatus);
+  if (q) rows = rows.filter(r => Object.keys(r).some(k => {
+    const f = fieldDef(k);
+    const txt = f && f.type === 'choice' ? splitList(r[k]).map(x => choiceLabel(f.set, x)).join(' ') : String(r[k]);
+    return txt.toLowerCase().includes(q);
+  }));
+  rows.sort((a, b) => String(b['Módosítva'] || '').localeCompare(String(a['Módosítva'] || '')));
+  return rows;
+}
+function renderList(){
+  const all = topicRecords(), rows = listRows(), tp = curTopic();
+  const counts = {}; STATUSES.forEach(s => { counts[s] = all.filter(r => (r['Állapot'] || 'piszkozat') === s).length; });
+  const filtering = S.q.trim() || S.fStatus !== 'all';
+  return `${errBanner()}
+  <div class="listbar">
+    <input type="search" id="q" placeholder="${esc(t('l.search'))}" value="${esc(S.q)}">
+    <button class="btn" data-act="sync">${esc(t('l.refresh'))}</button>
+    <button class="btn" data-act="export" ${all.length ? '' : 'disabled'}>${esc(t('l.export'))}</button>
+  </div>
+  <div class="listbar"><div class="seg">${[['all', t('l.all') + ' (' + all.length + ')']].concat(STATUSES.map(s => [s, t('st.' + s) + ' (' + counts[s] + ')'])).map(([v, l]) => `<button class="${S.fStatus === v ? 'on' : ''}" data-act="fstatus" data-f="${esc(v)}">${esc(l)}</button>`).join('')}</div></div>
+  <div class="stats">${esc(t('l.count', {n:all.length}))}${filtering ? ' · ' + esc(t('l.hits', {n:rows.length})) : ''}</div>
+  ${rows.length ? `<div class="recs">${rows.map(r => {
+    const chips = [];
+    if (r['Forrás típusa']) chips.push(choiceLabel('stype', r['Forrás típusa']));
+    if (r['Relevancia']) chips.push(choiceLabel('relevance', r['Relevancia']));
+    splitList(r['Címkék']).forEach(x => chips.push(x));
+    return `<button class="rec" data-act="open-record" data-id="${esc(r.id)}">
+      ${statusBadge(r['Állapot'] || 'piszkozat')}
+      <span class="rt">${esc(recTitle(r))}</span>
+      <span class="rm">${esc(r['Feldolgozó'] || '')}${r['Módosítva'] ? ' · ' + esc(r['Módosítva']) : ''}</span>
+      <span class="rc">${chips.slice(0, 10).map(c => `<span class="chip">${esc(c)}</span>`).join('')}${filled(r['Témavezetői megjegyzés']) ? `<span class="chip cm">${esc(t('l.hasComment'))}</span>` : ''}${filled(r['Kérdés a témavezetőnek']) && tp.sajat ? `<span class="chip cm">?</span>` : ''}</span>
+    </button>`; }).join('')}</div>`
+    : `<div class="card empty">${esc(all.length ? t('l.noMatch') : (S.status === 'loading' && !S.loaded ? t('l.loading') : t('l.empty')))}</div>`}`;
+}
+function fmtValue(k, v){
+  const f = fieldDef(k);
+  if (k === 'Állapot') return v ? t('st.' + v) : '';
+  if (f && f.type === 'choice') return splitList(v).map(x => choiceLabel(f.set, x)).join(', ');
+  if (v === 'nem közli' && S.lang === 'en') return t('f.nk');
+  return v == null ? '' : String(v);
+}
+function renderDetail(){
+  let ov = $('#detailOv');
+  const r = S.detail && S.token && findRecord(S.detail.id);
+  if (!r){ S.detail = null; if (ov) ov.remove(); return; }
+  const tp = S.topics.find(x => x.id === String(r['téma'])) || {};
+  const st = r['Állapot'] || 'piszkozat';
+  const known = new Set(['id', 'téma', 'Feldolgozó', 'Feldolgozó e-mail', 'Létrehozva', 'Módosítva', 'Utoljára módosította', 'Állapot', 'Témavezetői megjegyzés', 'Megjegyzés ideje']);
+  const blocks = TPL.map(b => {
+    b.f.forEach(f => known.add(f.k));
+    return `<h3>${esc(L(b)[0])}</h3><div class="dl">${b.f.map(f => {
+      const has = filled(r[f.k]);
+      return `<div class="k">${esc(L(f)[0])}</div><div class="v ${has ? '' : 'none'}">${has ? esc(fmtValue(f.k, r[f.k])) : esc(t('d.empty'))}</div>`;
+    }).join('')}</div>`;
+  }).join('');
+  const extra = Object.keys(r).filter(k => !known.has(k) && filled(r[k]));
+  const extraHtml = extra.length ? `<h3>${esc(t('d.extra'))}</h3><div class="dl">${extra.map(k => `<div class="k">${esc(k)}</div><div class="v">${esc(r[k])}</div>`).join('')}</div>` : '';
+  if (S.detail.rv == null) S.detail.rv = st;
+  const review = tp.sajat ? `<div class="review"><h3>${esc(t('rv.title'))}</h3>
+      <div class="seg" id="rvSeg">${STATUSES.map(s => `<button type="button" class="${S.detail.rv === s ? 'on' : ''}" data-act="rv-st" data-s="${esc(s)}">${esc(t('st.' + s))}</button>`).join('')}</div>
+      <textarea id="rvText" rows="4" placeholder="${esc(t('rv.ph'))}">${esc(S.detail.rvText != null ? S.detail.rvText : (r['Témavezetői megjegyzés'] || ''))}</textarea>
+      <div class="rr"><span class="muted" style="font-size:13px">${r['Megjegyzés ideje'] ? esc(t('rv.when', {t:r['Megjegyzés ideje']})) : ''}</span><button class="btn primary sm" data-act="rv-save">${esc(t('rv.save'))}</button></div></div>`
+    : (filled(r['Témavezetői megjegyzés']) ? `<div class="banner ${st === 'javítandó' ? 'warn' : 'info'}" style="margin-top:16px"><p><span class="lbl">${esc(t('f.comment'))}${r['Megjegyzés ideje'] ? ' · ' + esc(r['Megjegyzés ideje']) : ''}</span><span class="cm">${esc(r['Témavezetői megjegyzés'])}</span></p></div>` : '');
+  const canEdit = canWrite(tp), canDel = tp.sajat || canEdit;
+  if (!ov){ ov = document.createElement('div'); ov.className = 'overlay'; ov.id = 'detailOv'; ov.dataset.act = 'close-detail'; document.body.appendChild(ov); }
+  const sc = ov.scrollTop;
+  ov.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
+    <header><div class="h">${statusBadge(st)}<h2>${esc(recTitle(r))}</h2>
+      <div class="muted" style="font-size:13px;margin-top:4px">${esc(t('d.by', {n:r['Feldolgozó'] || '?'}))} · ${esc(t('d.created', {t:r['Létrehozva'] || '?'}))} · ${esc(t('d.modified', {t:r['Módosítva'] || '?'}))}${r['Utoljára módosította'] ? ' (' + esc(r['Utoljára módosította']) + ')' : ''}</div></div>
+      <button class="btn ghost sm" data-act="close-detail">${esc(t('d.close'))}</button></header>
+    <div class="body">${review}${blocks}${extraHtml}</div>
+    <footer>${canDel ? `<button class="btn danger left" data-act="del-record" data-id="${esc(r.id)}">${esc(t('d.delete'))}</button>` : ''}
+      <button class="btn" data-act="close-detail">${esc(t('d.close'))}</button>
+      ${canEdit ? `<button class="btn primary" data-act="edit-record" data-id="${esc(r.id)}">${esc(t('d.edit'))}</button>` : ''}</footer>
+  </div>`;
+  ov.scrollTop = sc;
+}
+async function saveReview(btn){
+  const d = S.detail; if (!d) return;
+  const txt = $('#rvText') ? $('#rvText').value : '';
+  btn.disabled = true;
+  try{
+    const j = await api('review', {id:d.id, allapot:d.rv, megjegyzes:txt});
+    const r = findRecord(d.id);
+    if (r){ r['Állapot'] = j.allapot; r['Témavezetői megjegyzés'] = txt; r['Megjegyzés ideje'] = j.ido; }
+    d.rvText = null;
+    toast(t('rv.saved'));
+    renderDetail(); renderView(); renderHeader();
+  }catch(e){ if (!e.auth) toast(e.message, true); }
+  finally{ btn.disabled = false; }
+}
+async function deleteRecord(id){
+  if (!confirm(t('d.confirmDelete'))) return;
+  try{
+    await api('deleteRecord', {id});
+    S.records = S.records.filter(r => String(r.id) !== String(id));
+    if (S.current && S.current.id === String(id)){ S.current = newCurrent(); setDirty(false); saveDraft(); }
+    S.detail = null; renderDetail(); renderView(); renderHeader();
+    toast(t('d.deleted'));
+  }catch(e){ if (!e.auth) toast(e.message, true); }
+}
+
+/* ================= Téma és hallgatók ================= */
+function renderMembers(){
+  const tp = curTopic();
+  const rows = tp.tagok.map(m => {
+    let stat;
+    if (m.regisztralt) stat = `<span class="badge st-acc">${esc(t('m.registered'))}</span>`;
+    else if (m.meghivoLejar) stat = `<span class="badge st-sub">${esc(t('m.pending', {d:dateStr(m.meghivoLejar)}))}</span>`;
+    else stat = `<span class="badge st-rev">${esc(t('m.expired'))}</span>`;
+    return `<tr><td><div>${esc(m.nev || m.email)} ${m.en ? `<span class="muted">${esc(t('m.you'))}</span>` : ''}</div>${m.nev ? `<div class="sub">${esc(m.email)}</div>` : ''}<div style="margin-top:4px">${stat}</div></td>
+      <td class="act"><button class="btn sm" data-act="m-link" data-email="${esc(m.email)}">${esc(t(m.regisztralt ? 'm.resetLink' : 'm.newInvite'))}</button>
+        <button class="btn sm ghost" data-act="m-remove" data-email="${esc(m.email)}">${esc(t('m.remove'))}</button></td></tr>`;
+  }).join('');
+  return `${errBanner()}<div class="mgrid">
+    <div class="card pad"><h3>${esc(t('m.topic'))}</h3>
+      <div class="tags" style="margin-bottom:8px"><span class="badge lvl">${esc(lvlLabel(tp.kepzes))}</span>${tp.aktiv ? '' : `<span class="badge closed">${esc(t('closed'))}</span>`}</div>
+      <div style="font-weight:600;font-size:17px">${esc(tp.cim)}</div>
+      ${tp.leiras ? `<p style="white-space:pre-wrap;margin:8px 0 0">${esc(tp.leiras)}</p>` : ''}
+      <div class="kv muted" style="margin-top:10px;font-size:13px">${esc(t('m.created', {t:tp.letrehozva}))}</div>
+      ${tp.aktiv ? '' : `<div class="note">${esc(t('m.closedNote'))}</div>`}
+      <div class="addrow"><button class="btn" data-act="topic-edit">${esc(t('m.edit'))}</button><button class="btn ${tp.aktiv ? 'ghost' : 'primary'}" data-act="topic-toggle">${esc(t(tp.aktiv ? 'm.close' : 'm.reopen'))}</button></div>
+    </div>
+    <div class="card pad"><h3>${esc(t('m.students'))}</h3>
+      ${tp.tagok.length ? `<table class="mtable">${rows}</table>` : `<p class="muted">${esc(t('m.noStudents'))}</p>`}
+      <form id="addMemberForm" class="addrow"><input type="text" id="mAdd" placeholder="${esc(t('m.addPh'))}" spellcheck="false" autocomplete="off"><button class="btn primary" type="submit">${esc(t('m.add'))}</button></form>
+    </div>
+  </div>`;
+}
+async function memberLink(email, btn){
+  btn.disabled = true;
+  try{
+    const j = await api('inviteNew', {tema:S.topicId, email});
+    const m = j.meghivo;
+    S.modal = {kind:'invites', cim:curTopic().cim, items:[{email:m.email, token:m.token, lejar:m.lejar, reset:m.tipus === 'reset'}]};
+    renderModal(); sync(true);
+  }catch(e){ if (!e.auth) toast(e.message, true); }
+  finally{ btn.disabled = false; }
+}
+async function memberRemove(email){
+  if (!confirm(t('m.confirmRemove', {e:email}))) return;
+  try{ await api('memberRemove', {tema:S.topicId, email}); toast(t('m.removed')); await sync(true); }
+  catch(e){ if (!e.auth) toast(e.message, true); }
+}
+async function memberAdd(){
+  const inp = $('#mAdd'), v = inp.value.trim(); if (!v) return;
+  const btn = $('#addMemberForm button'); btn.disabled = true;
+  try{
+    const j = await api('memberAdd', {tema:S.topicId, email:v});
+    inp.value = '';
+    S.modal = {kind:'invites', cim:curTopic().cim, items:j.meghivok.map(m => ({email:m.email, token:m.token, lejar:m.lejar, mar:m.mar, regisztralt:m.regisztralt}))};
+    renderModal(); await sync(true);
+  }catch(e){ if (!e.auth) toast(e.message, true); }
+  finally{ btn.disabled = false; }
+}
+async function topicToggle(){
+  const tp = curTopic();
+  if (tp.aktiv && !confirm(t('m.confirmClose'))) return;
+  try{ await api('topicSave', {tema:{id:tp.id, cim:tp.cim, leiras:tp.leiras, kepzes:tp.kepzes, aktiv:!tp.aktiv}}); await sync(true); }
+  catch(e){ if (!e.auth) toast(e.message, true); }
+}
+
+/* ================= Modális ablakok: téma, meghívók, fiók ================= */
+function mailtoLink(it, cim){
+  const vars = {t:cim, e:it.email, d:dateStr(it.lejar), l:inviteUrl(it.token), u:siteUrl(), n:S.user.nev};
+  const fill = (lang, k) => I18N[lang][k].replace(/\{(\w+)\}/g, (m, x) => vars[x] == null ? m : vars[x]);
+  const k = it.reset ? 'mail.reset' : 'mail.invite';
+  const first = S.lang, second = S.lang === 'hu' ? 'en' : 'hu';
+  const body = fill(first, k) + '\n\n----------\n\n' + fill(second, k);
+  const subj = I18N.hu[it.reset ? 'mail.subjReset' : 'mail.subjInvite'];
+  return `mailto:${encodeURIComponent(it.email)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+}
+function renderModal(){
+  let ov = $('#modalOv');
+  const m = S.modal;
+  if (!m || !S.token){ S.modal = null; if (ov) ov.remove(); return; }
+  if (!ov){ ov = document.createElement('div'); ov.className = 'overlay'; ov.id = 'modalOv'; ov.dataset.act = 'close-modal'; document.body.appendChild(ov); }
+  let html = '';
+  if (m.kind === 'topic'){
+    const tp = m.id ? S.topics.find(x => x.id === m.id) : null;
+    const lv = m.kepzes || (tp ? tp.kepzes : 'BSc');
+    html = `<div class="modal narrow" role="dialog" aria-modal="true">
+      <header><div class="h"><h2 style="margin-top:0">${esc(t(tp ? 't.editTitle' : 't.newTitle'))}</h2></div><button class="btn ghost sm" data-act="close-modal">${esc(t('d.close'))}</button></header>
+      <form id="topicForm" class="body frm">
+        <div><label for="tpCim">${esc(t('t.cim'))}</label><input type="text" id="tpCim" value="${esc(tp ? tp.cim : '')}" placeholder="${esc(t('t.cimPh'))}"></div>
+        <div><label for="tpLeiras">${esc(t('t.leiras'))}</label><textarea id="tpLeiras" rows="3" placeholder="${esc(t('t.leirasPh'))}">${esc(tp ? tp.leiras : '')}</textarea></div>
+        <div><label>${esc(t('t.kepzes'))}</label><div class="seg">${LEVELS.map(l => `<button type="button" class="${lv === l ? 'on' : ''}" data-act="tp-lvl" data-l="${esc(l)}">${esc(lvlLabel(l))}</button>`).join('')}</div></div>
+        ${tp ? '' : `<div><label for="tpStud">${esc(t('t.students'))}</label><textarea id="tpStud" rows="3" spellcheck="false" placeholder="anna.kovacs@example.com"></textarea><div class="note">${esc(t('t.studentsNote'))}</div></div>`}
+        <div class="note err" id="tpMsg" role="alert"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="close-modal">${esc(t('t.cancel'))}</button><button type="submit" class="btn primary" id="tpBtn">${esc(t(tp ? 't.save' : 't.create'))}</button></div>
+      </form></div>`;
+  } else if (m.kind === 'invites'){
+    const items = m.items.map(it => {
+      if (it.token) return `<div class="invitem"><div class="em">${esc(it.email)}</div>
+        <div class="note">${it.reset ? esc(t('iv.resetNote')) + ' ' : ''}${esc(t('iv.until', {d:dateStr(it.lejar)}))}</div>
+        <div class="row"><input type="text" readonly value="${esc(inviteUrl(it.token))}" data-act="sel"><button class="btn sm" data-act="iv-copy" data-link="${esc(inviteUrl(it.token))}">${esc(t('iv.copy'))}</button><a class="btn sm primary" href="${esc(mailtoLink(it, m.cim))}">${esc(t('iv.mail'))}</a></div></div>`;
+      return `<div class="invitem"><div class="em">${esc(it.email)}</div><div class="note">${esc(t(it.mar ? 'iv.member' : 'iv.already'))}</div></div>`;
+    }).join('');
+    html = `<div class="modal narrow" role="dialog" aria-modal="true">
+      <header><div class="h"><h2 style="margin-top:0">${esc(t('iv.title'))}</h2><div class="muted" style="font-size:13.5px;margin-top:4px">${esc(m.cim)}</div></div><button class="btn ghost sm" data-act="close-modal">${esc(t('d.close'))}</button></header>
+      <div class="body">${items}<p class="note" style="margin-top:14px">${esc(t('iv.note'))}</p></div>
+      <footer><button class="btn primary" data-act="close-modal">${esc(t('d.close'))}</button></footer></div>`;
+  } else if (m.kind === 'account'){
+    html = `<div class="modal narrow" role="dialog" aria-modal="true">
+      <header><div class="h"><h2 style="margin-top:0">${esc(t('ac.title'))}</h2><div class="muted" style="font-size:13.5px;margin-top:4px">${esc(t('ac.email', {e:S.user.email}))} · ${esc(t('ac.role', {r:t(S.user.szerep === 'tv' ? 'role.tv' : 'role.h')}))}</div></div><button class="btn ghost sm" data-act="close-modal">${esc(t('d.close'))}</button></header>
+      <div class="body">
+        <form id="nameForm" class="frm" style="margin-top:16px"><div><label for="acName">${esc(t('ac.name'))}</label><input type="text" id="acName" value="${esc(S.user.nev)}" autocomplete="name"></div>
+          <div><button type="submit" class="btn">${esc(t('ac.saveName'))}</button></div></form>
+        <h3>${esc(t('ac.pwTitle'))}</h3>
+        <form id="pwForm" class="frm"><input type="email" autocomplete="username" value="${esc(S.user.email)}" hidden>
+          <div><label for="acOld">${esc(t('ac.oldPw'))}</label><input type="password" id="acOld" autocomplete="current-password"></div>
+          <div><label for="acNew">${esc(t('ac.newPw'))}</label><input type="password" id="acNew" autocomplete="new-password"><div class="note">${esc(t('lg.pwNote'))}</div></div>
+          <div><label for="acNew2">${esc(t('ac.newPw2'))}</label><input type="password" id="acNew2" autocomplete="new-password"></div>
+          <div><button type="submit" class="btn primary">${esc(t('ac.savePw'))}</button></div>
+          <div class="note err" id="acMsg" role="alert"></div></form>
+      </div></div>`;
+  }
+  ov.innerHTML = html;
+}
+async function submitTopic(){
+  const m = S.modal, msg = $('#tpMsg'), btn = $('#tpBtn');
+  const cim = $('#tpCim').value.trim(), leiras = $('#tpLeiras').value.trim();
+  const tp = m.id ? S.topics.find(x => x.id === m.id) : null;
+  const kepzes = m.kepzes || (tp ? tp.kepzes : 'BSc');
+  if (!cim){ msg.textContent = t('t.needTitle'); return; }
+  btn.disabled = true; msg.textContent = '';
+  try{
+    if (tp){
+      await api('topicSave', {tema:{id:tp.id, cim, leiras, kepzes}});
+      S.modal = null; renderModal(); toast(t('t.saved')); await sync(true);
+    } else {
+      const j = await api('topicSave', {tema:{cim, leiras, kepzes}, hallgatok:$('#tpStud').value});
+      await sync(true);
+      openTopic(j.tema.id, true); S.view = 'members'; renderHeader(); renderView();
+      const items = (j.meghivok || []).map(x => ({email:x.email, token:x.token, lejar:x.lejar, mar:x.mar, regisztralt:x.regisztralt}));
+      S.modal = items.length ? {kind:'invites', cim, items} : null;
+      renderModal(); toast(t('t.created'));
+    }
+  }catch(e){ if (!e.auth){ msg.textContent = e.message; btn.disabled = false; } }
+}
+async function submitName(){
+  const nev = $('#acName').value.trim(); if (!nev) return;
+  try{
+    const j = await api('profile', {nev});
+    S.user = j.user; const auth = store.get('sz_auth', null); if (auth){ auth.user = j.user; store.set('sz_auth', auth); }
+    toast(t('ac.nameSaved')); renderHeader();
+  }catch(e){ if (!e.auth) toast(e.message, true); }
+}
+async function submitPw(){
+  const regi = $('#acOld').value, uj = $('#acNew').value, uj2 = $('#acNew2').value, msg = $('#acMsg');
+  if (!regi || !uj || !uj2){ msg.textContent = t('lg.fillAll'); return; }
+  if (uj.length < 8){ msg.textContent = t('lg.pwShort'); return; }
+  if (uj !== uj2){ msg.textContent = t('lg.pwMismatch'); return; }
+  msg.textContent = '';
+  try{
+    const j = await api('changePassword', {regi, uj});
+    const auth = saveAuth(j); S.token = auth.token; S.lejar = auth.lejar;
+    S.modal = null; renderModal(); toast(t('ac.pwSaved'));
+  }catch(e){ if (!e.auth) msg.textContent = e.message; }
+}
+
+/* ================= Letöltés táblázatként ================= */
+const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+function exportGroups(){
+  return TPL.map(b => ({t:L(b)[0], f:b.f.map(f => f.k)})).concat([{t:t('ex.admin'), f:META_COLS}]);
+}
+function openExport(){ S.export = {scope:'all', cols:new Set(store.get('sz_export_cols', MATRIX))}; renderExport(); }
+function exportCols(){ return exportGroups().flatMap(g => g.f).filter(k => S.export.cols.has(k)); }
+function exportRows(){
+  const rows = S.export.scope === 'view' ? listRows() : topicRecords().slice();
+  return rows.sort((a, b) => String(a['Hivatkozás'] || '').localeCompare(String(b['Hivatkozás'] || ''), S.lang));
+}
+function renderExport(){
+  let ov = $('#exportOv');
+  if (!S.export || !S.token){ S.export = null; if (ov) ov.remove(); return; }
+  const e = S.export, filtering = !!(S.q.trim() || S.fStatus !== 'all');
+  if (e.scope === 'view' && !filtering) e.scope = 'all';
+  const cols = exportCols(), rows = exportRows();
+  if (!ov){ ov = document.createElement('div'); ov.className = 'overlay'; ov.id = 'exportOv'; ov.dataset.act = 'close-export'; document.body.appendChild(ov); }
+  const sc = ov.scrollTop;
+  ov.innerHTML = `<div class="modal wide" role="dialog" aria-modal="true" aria-label="${esc(t('ex.title'))}">
+    <header><div class="h"><h2 style="margin-top:0">${esc(t('ex.title'))}</h2><div class="muted" style="font-size:13.5px;margin-top:4px">${esc(t('ex.sub'))}</div></div>
+      <button class="btn ghost sm" data-act="close-export">${esc(t('d.close'))}</button></header>
+    <div class="body">
+      ${filtering ? `<div class="exrow"><span class="exlbl">${esc(t('ex.rows'))}</span><div class="seg"><button class="${e.scope === 'all' ? 'on' : ''}" data-act="ex-scope" data-s="all">${esc(t('ex.all', {n:topicRecords().length}))}</button><button class="${e.scope === 'view' ? 'on' : ''}" data-act="ex-scope" data-s="view">${esc(t('ex.view', {n:listRows().length}))}</button></div></div>` : ''}
+      <div class="exrow"><span class="exlbl">${esc(t('ex.cols'))}</span><div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="mini" data-act="ex-preset" data-p="matrix" title="${esc(t('ex.matrixTip'))}">${esc(t('ex.matrix'))}</button>
+        <button class="mini" data-act="ex-preset" data-p="all">${esc(t('ex.allCols'))}</button>
+        <button class="mini" data-act="ex-preset" data-p="none">${esc(t('ex.none'))}</button></div></div>
+      <div class="exgrid">${exportGroups().map((g, gi) => {
+        const on = g.f.filter(k => e.cols.has(k)).length;
+        return `<div class="exblk"><label class="ck bh"><input type="checkbox" data-exblk="${gi}" ${on === g.f.length ? 'checked' : ''} ${on && on < g.f.length ? 'data-ind="1"' : ''}>${esc(g.t)}</label>
+          ${g.f.map(k => `<label class="ck"><input type="checkbox" data-excol="${esc(k)}" ${e.cols.has(k) ? 'checked' : ''}>${esc(fLabel(k))}</label>`).join('')}</div>`;
+      }).join('')}</div>
+    </div>
+    <footer><span class="exsum">${esc(t('ex.sum', {r:rows.length, c:cols.length}))}</span>
+      <button class="btn" data-act="ex-go" data-fmt="csv" ${rows.length && cols.length ? '' : 'disabled'}>CSV</button>
+      <button class="btn primary" data-act="ex-go" data-fmt="xlsx" ${rows.length && cols.length ? '' : 'disabled'}>${esc(t('ex.excel'))}</button></footer>
+  </div>`;
+  $$('[data-ind]', ov).forEach(c => { c.indeterminate = true; });
+  ov.scrollTop = sc;
+}
+function cellVal(k, v){
+  if (v == null) return '';
+  const s = fmtValue(k, v);
+  if ((k === 'Év' || k === 'Megbízhatóság (1-5)') && /^\d+$/.test(s.trim())) return Number(s.trim());
+  return s;
+}
+function colWidth(k){
+  if (k === 'Hivatkozás') return 60;
+  const f = fieldDef(k);
+  if (!f) return k === 'Témavezetői megjegyzés' ? 45 : 17;
+  if (f.type === 'textarea') return 45;
+  if (f.type === 'choice' || f.type === 'tags') return 24;
+  if (f.type === 'scale' || k === 'Év') return 12;
+  return 24;
+}
+function loadXLSX(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = XLSX_URL;
+    s.onload = () => window.XLSX ? res(window.XLSX) : rej(new Error(t('ex.libFail')));
+    s.onerror = () => rej(new Error(t('ex.libFail')));
+    document.head.appendChild(s);
+  });
+}
+function fileBase(){
+  const tp = curTopic();
+  const slug = String(tp ? tp.cim : 'tema').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 40);
+  return `${S.lang === 'en' ? 'LiteratureReview' : 'Szakirodalom'}_${slug}_${nowStr().slice(0, 10)}`;
+}
+async function doExport(fmt, btn){
+  const cols = exportCols(), rows = exportRows();
+  if (!cols.length || !rows.length) return;
+  store.set('sz_export_cols', cols);
+  const aoa = [cols.map(fLabel)].concat(rows.map(r => cols.map(c => cellVal(c, r[c]))));
+  if (fmt === 'csv'){
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv = '﻿' + aoa.map(r => r.map(q).join(';')).join('\r\n');
+    download(fileBase() + '.csv', new Blob([csv], {type:'text/csv;charset=utf-8'}));
+    toast(t('ex.csvDone', {r:rows.length, c:cols.length}));
+    return;
+  }
+  const old = btn.textContent; btn.disabled = true; btn.textContent = t('ex.busy');
+  try{
+    const X = await loadXLSX();
+    const ws = X.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = cols.map(c => ({wch:colWidth(c)}));
+    ws['!autofilter'] = {ref:X.utils.encode_range({s:{r:0, c:0}, e:{r:aoa.length - 1, c:cols.length - 1}})};
+    const wb = X.utils.book_new();
+    X.utils.book_append_sheet(wb, ws, t('ex.sheet'));
+    X.writeFile(wb, fileBase() + '.xlsx');
+    toast(t('ex.done', {r:rows.length, c:cols.length}));
+  }catch(err){
+    toast(t('ex.fail', {m:err.message}), true);
+  }finally{
+    btn.disabled = false; btn.textContent = old;
+  }
+}
+
+/* ================= Események ================= */
+function go(step){ S.current.step = step; saveDraft(); renderView(); window.scrollTo(0, 0); }
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act, k = el.dataset.k;
+  if (el.classList.contains('overlay') && e.target !== el) return;
+  switch (act){
+    case 'lang': S.lang = S.lang === 'hu' ? 'en' : 'hu'; store.set('sz_lang', S.lang); rerenderAll(); break;
+    case 'lg-tab': S.loginTab = el.dataset.tab; S.loginMsg = ''; renderLogin(); break;
+    case 'to-login':
+      if (el.dataset.email) store.set('sz_email', el.dataset.email);
+      S.invite = null; try{ history.replaceState(null, '', location.pathname + location.search); }catch(x){}
+      S.loginTab = 'login'; renderLogin(); break;
+    case 'tab': S.view = el.dataset.view; S.detail = null; if (S.view === 'home') S.topicId = S.topicId; renderHeader(); renderView(); renderDetail(); window.scrollTo(0, 0); break;
+    case 'sync': sync(false); break;
+    case 'logout': logout(''); break;
+    case 'account': S.modal = {kind:'account'}; renderModal(); break;
+    case 'open-topic': openTopic(el.dataset.id); break;
+    case 'topic-new': S.modal = {kind:'topic'}; renderModal(); setTimeout(() => { const f = $('#tpCim'); if (f) f.focus(); }, 0); break;
+    case 'topic-edit': S.modal = {kind:'topic', id:S.topicId}; renderModal(); break;
+    case 'topic-toggle': topicToggle(); break;
+    case 'tp-lvl': S.modal.kepzes = el.dataset.l; $$('[data-act="tp-lvl"]').forEach(b => b.classList.toggle('on', b === el)); break;
+    case 'close-modal': S.modal = null; renderModal(); break;
+    case 'iv-copy': toast(await copyText(el.dataset.link) ? t('iv.copied') : el.dataset.link); break;
+    case 'sel': el.select(); break;
+    case 'm-link': memberLink(el.dataset.email, el); break;
+    case 'm-remove': memberRemove(el.dataset.email); break;
+    case 'new-record':
+      if (S.dirty && !confirm(t('f.confirmNew'))) return;
+      S.current = newCurrent(); setDirty(false); saveDraft(); S.helpOpen = {}; renderView(); window.scrollTo(0, 0); break;
+    case 'goto': go(+el.dataset.i); break;
+    case 'next': go(S.current.step + 1); break;
+    case 'prev': go(S.current.step - 1); break;
+    case 'help': {
+      if (S.helpAll) return;
+      S.helpOpen[k] = !S.helpOpen[k];
+      const fe = fieldEl(k); if (fe){ $('.help', fe).hidden = !S.helpOpen[k]; el.classList.toggle('on', !!S.helpOpen[k]); }
+      break;
+    }
+    case 'helpall': S.helpAll = el.checked; store.set('sz_helpall', S.helpAll); renderView(); break;
+    case 'nk': {
+      S.current.fields[k] = I18N.hu['f.nkVal'];
+      const fe = fieldEl(k), inp = fe && $('input[data-k],textarea[data-k]', fe); if (inp) inp.value = I18N.hu['f.nkVal'];
+      markDirty(); break;
+    }
+    case 'doi': doiLookup(el); break;
+    case 'scale': S.current.fields[k] = S.current.fields[k] === el.dataset.n ? '' : el.dataset.n; rerenderField(k); markDirty(); break;
+    case 'opt': {
+      const f = fieldDef(k), code = el.dataset.code;
+      if (f.single) S.current.fields[k] = S.current.fields[k] === code ? '' : code;
+      else {
+        const arr = splitList(S.current.fields[k]).slice(), i = arr.indexOf(code);
+        if (i >= 0) arr.splice(i, 1); else arr.push(code);
+        S.current.fields[k] = CHOICES[f.set].map(x => x[0]).filter(x => arr.includes(x)).concat(arr.filter(x => !CHOICES[f.set].some(c => c[0] === x)));
+      }
+      rerenderField(k); markDirty(); break;
+    }
+    case 'tag-add': {
+      const arr = splitList(S.current.fields[k]); arr.push(el.dataset.tag);
+      S.current.fields[k] = arr.join(', '); rerenderField(k); markDirty(); break;
+    }
+    case 'save': saveCurrent(false); break;
+    case 'submit': saveCurrent(true); break;
+    case 'fstatus': S.fStatus = el.dataset.f; renderView(); break;
+    case 'open-record': S.detail = {id:el.dataset.id}; renderDetail(); break;
+    case 'close-detail': S.detail = null; renderDetail(); break;
+    case 'rv-st': S.detail.rv = el.dataset.s; $$('[data-act="rv-st"]').forEach(b => b.classList.toggle('on', b === el)); break;
+    case 'rv-save': saveReview(el); break;
+    case 'del-record': deleteRecord(el.dataset.id); break;
+    case 'edit-record': {
+      if (S.dirty && S.current && S.current.id !== el.dataset.id && !confirm(t('f.confirmOpen'))) return;
+      const r = findRecord(el.dataset.id); if (!r) return;
+      S.current = {id:String(r.id), fields:recordToFields(r), step:0, saved:true, savedAt:r['Módosítva'] || ''};
+      setDirty(false); saveDraft(); S.detail = null; S.view = 'form'; S.helpOpen = {};
+      renderDetail(); renderHeader(); renderView(); window.scrollTo(0, 0); break;
+    }
+    case 'export': openExport(); break;
+    case 'close-export': S.export = null; renderExport(); break;
+    case 'ex-scope': S.export.scope = el.dataset.s; renderExport(); break;
+    case 'ex-preset': {
+      const p = el.dataset.p;
+      S.export.cols = new Set(p === 'matrix' ? MATRIX : p === 'all' ? exportGroups().flatMap(g => g.f) : []);
+      renderExport(); break;
+    }
+    case 'ex-go': doExport(el.dataset.fmt, el); break;
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target; if (!S.export) return;
+  if (el.dataset.excol){ if (el.checked) S.export.cols.add(el.dataset.excol); else S.export.cols.delete(el.dataset.excol); renderExport(); }
+  else if (el.dataset.exblk){
+    const g = exportGroups()[+el.dataset.exblk];
+    g.f.forEach(k => { if (el.checked) S.export.cols.add(k); else S.export.cols.delete(k); });
+    renderExport();
+  }
+});
+document.addEventListener('submit', e => {
+  const id = e.target.id;
+  const map = {loginForm:doLogin, regForm:doRegister, invForm:doInvite, topicForm:submitTopic, nameForm:submitName, pwForm:submitPw, addMemberForm:memberAdd};
+  if (map[id]){ e.preventDefault(); map[id](); }
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.id === 'q'){
+    S.q = el.value; const pos = el.selectionStart; renderView();
+    const q = $('#q'); if (q){ q.focus(); try{ q.setSelectionRange(pos, pos); }catch(x){} }
+    return;
+  }
+  if (el.id === 'rvText' && S.detail){ S.detail.rvText = el.value; return; }
+  if (S.current && S.view === 'form' && el.dataset && el.dataset.k && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')){
+    S.current.fields[el.dataset.k] = el.value; markDirty();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){
+    if (S.modal){ S.modal = null; renderModal(); }
+    else if (S.export){ S.export = null; renderExport(); }
+    else if (S.detail){ S.detail = null; renderDetail(); }
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's' && S.token && S.view === 'form' && S.current){ e.preventDefault(); saveCurrent(false); }
+});
+window.addEventListener('beforeunload', e => { if (S.dirty && S.token){ e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('hashchange', () => {
+  const m = /invite=([a-f0-9]+)/i.exec(location.hash);
+  if (m && !S.token) startInvite(m[1]);
+});
+
+/* ================= Indítás ================= */
+(function init(){
+  document.documentElement.lang = S.lang;
+  const m = /invite=([a-f0-9]+)/i.exec(location.hash);
+  if (m){
+    if (S.token) logout('');
+    store.del('sz_auth');
+    startInvite(m[1]);
+    return;
+  }
+  const auth = store.get('sz_auth', null);
+  if (API && auth && auth.token && auth.lejar > Date.now() && auth.user) enter(auth);
+  else renderLogin();
+})();
+</script>
+</body>
+</html>
